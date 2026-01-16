@@ -1,0 +1,70 @@
+{% extends "base.jinja" %}
+
+{% block title %}Calendar Sync - RankTutor{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <h1 class="text-3xl font-bold text-gray-900 mb-6">Calendar Synchronization</h1>
+    
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h2 class="text-xl font-semibold mb-4">Sync External Calendar</h2>
+        <p class="text-gray-600 mb-6">Connect your Google Calendar or Outlook to automatically sync your lessons and avoid double bookings.</p>
+        
+        <form method="post">
+            <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Calendar Type</label>
+                    <select name="calendar_type" class="w-full rounded-md border-gray-300" required>
+                        <option value="">Select Calendar</option>
+                        <option value="google">Google Calendar</option>
+                        <option value="outlook">Microsoft Outlook</option>
+                        <option value="ical">iCal/Other</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Calendar ID / URL</label>
+                    <input type="text" name="calendar_id" class="w-full rounded-md border-gray-300" placeholder="Enter calendar ID or URL">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Sync Token (Optional)</label>
+                    <input type="text" name="sync_token" class="w-full rounded-md border-gray-300" placeholder="For advanced sync">
+                </div>
+                <div>
+                    <button type="submit" class="bg-indigo-600 text-white px-6 py-3 rounded-md hover:bg-indigo-700">
+                        Connect Calendar
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-xl font-semibold mb-4">Connected Calendars</h2>
+        {% if syncs %}
+            <div class="space-y-4">
+                {% for sync in syncs %}
+                <div class="flex justify-between items-center p-4 border rounded-lg">
+                    <div>
+                        <p class="font-medium">{{ sync.get_calendar_type_display() }}</p>
+                        <p class="text-sm text-gray-500">
+                            {% if sync.last_synced_at %}
+                            Last synced: {{ sync.last_synced_at|date('M d, Y h:i A') }}
+                            {% else %}
+                            Never synced
+                            {% endif %}
+                        </p>
+                    </div>
+                    <span class="px-3 py-1 rounded-full text-sm font-semibold {% if sync.is_active %}bg-green-100 text-green-800{% else %}bg-gray-100 text-gray-800{% endif %}">
+                        {% if sync.is_active %}Active{% else %}Inactive{% endif %}
+                    </span>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-gray-500">No calendars connected yet.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+

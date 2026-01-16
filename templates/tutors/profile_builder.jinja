@@ -1,0 +1,204 @@
+{% extends "base.jinja" %}
+
+{% block title %}Profile Builder - RankTutor{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+    <!-- Header with Menu -->
+    <div class="mb-6">
+        <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">Complete Your Tutor Profile</h1>
+        <p class="text-gray-600 mb-4 text-sm sm:text-base">Keep your profile detailed and engaging so students can understand your strengths quickly.</p>
+        {% include "components/tutor_menu.jinja" %}
+    </div>
+    
+    <form method="post" class="space-y-4 sm:space-y-6">
+        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+        
+        <div class="bg-white rounded-lg shadow p-4 sm:p-6 space-y-4">
+            <h2 class="text-lg sm:text-xl font-semibold mb-4 text-gray-900 border-b border-gray-200 pb-2">Overview</h2>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Profile Headline</label>
+                <input type="text" name="headline" value="{{ tutor_profile.headline|default('') }}" class="w-full rounded-md border-gray-300" placeholder="e.g. IIT graduate | Calculus expert | 8+ years experience">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Bio</label>
+                <textarea name="bio" rows="5" class="w-full rounded-md border-gray-300" required>{{ tutor_profile.bio }}</textarea>
+                <p class="text-sm text-gray-500 mt-1">Describe your teaching philosophy, strengths, and what students can expect.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Languages</label>
+                    <input type="text" name="languages" value="{{ tutor_profile.languages|default('English, Hindi') }}" class="w-full rounded-md border-gray-300" placeholder="e.g. English, Hindi">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Default Hourly Rate (INR)</label>
+                    <input type="number" name="hourly_rate" value="{{ tutor_profile.hourly_rate|default('') }}" min="100" step="50" class="w-full rounded-md border-gray-300" placeholder="e.g. 500, 1000">
+                    <p class="text-sm text-gray-500 mt-1">Per hour rate for tutoring sessions</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow p-4 sm:p-6 space-y-4">
+            <h2 class="text-lg sm:text-xl font-semibold mb-4 text-gray-900 border-b border-gray-200 pb-2">Location</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">City</label>
+                    <input type="text" name="city" value="{{ tutor_profile.city }}" class="w-full rounded-md border-gray-300" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">State</label>
+                    <input type="text" name="state" value="{{ tutor_profile.state }}" class="w-full rounded-md border-gray-300" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Pincode</label>
+                    <input type="text" name="pincode" value="{{ tutor_profile.pincode }}" class="w-full rounded-md border-gray-300" required>
+                </div>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Service Areas</label>
+                <input type="text" name="service_areas" value="{{ tutor_profile.service_areas }}" class="w-full rounded-md border-gray-300" placeholder="Comma-separated pincodes or neighbourhoods">
+            </div>
+            {# Home Tutoring Location - Disabled for now #}
+            {% if False and tutor_profile.is_available_home %}
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Set Location (Home Tutoring)</label>
+                <div id="locationMap" style="height: 300px; width: 100%;" class="rounded-md border border-gray-300"></div>
+                <input type="hidden" name="latitude" id="latitude" value="{{ tutor_profile.latitude|default('') }}">
+                <input type="hidden" name="longitude" id="longitude" value="{{ tutor_profile.longitude|default('') }}">
+                <p class="text-sm text-gray-500 mt-2">Drag the marker or click on the map to set your home tutoring base location.</p>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Max Travel Distance (km)</label>
+                <input type="number" name="max_travel_distance" value="{{ tutor_profile.max_travel_distance|default(10) }}" min="1" max="50" class="w-full rounded-md border-gray-300">
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="bg-white rounded-lg shadow p-4 sm:p-6 space-y-4">
+            <h2 class="text-lg sm:text-xl font-semibold mb-4 text-gray-900 border-b border-gray-200 pb-2">Teaching Details</h2>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Subjects You Teach</label>
+                <p class="text-xs text-gray-500 mb-3">Select all subjects you can teach. These match with your onboarding data.</p>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+                    {% for subject in subjects %}
+                    <label class="flex items-center p-2 border rounded-md hover:border-indigo-200 {{ 'border-indigo-300 bg-indigo-50' if subject in selected_subjects else 'border-gray-200' }}">
+                        <input type="checkbox" name="subjects" value="{{ subject.id }}" {% if subject in selected_subjects %}checked{% endif %} class="rounded border-gray-300">
+                        <span class="ml-2 text-sm text-gray-700">{{ subject.name }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+                {% if not selected_subjects %}
+                <p class="text-xs text-indigo-600 mt-2">💡 Tip: Subjects from your onboarding are automatically matched if available.</p>
+                {% endif %}
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Teaching Level</label>
+                <select name="teaching_levels" class="w-full rounded-md border-gray-300">
+                    {% for value, label in teaching_level_choices %}
+                    <option value="{{ value }}" {% if tutor_profile.teaching_levels == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow p-4 sm:p-6 space-y-4">
+            <h2 class="text-lg sm:text-xl font-semibold mb-4 text-gray-900 border-b border-gray-200 pb-2">Professional Credentials</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Years of Experience</label>
+                    <input type="number" name="years_of_experience" value="{{ tutor_profile.years_of_experience|default(0) }}" min="0" max="50" class="w-full rounded-md border-gray-300">
+                </div>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Education & Certifications</label>
+                <textarea name="education" rows="3" class="w-full rounded-md border-gray-300" placeholder="Degrees, certifications, training programs, etc.">{{ tutor_profile.education|default('') }}</textarea>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Experience Summary</label>
+                <textarea name="experience_summary" rows="3" class="w-full rounded-md border-gray-300" placeholder="Share key highlights of your teaching journey.">{{ tutor_profile.experience_summary|default('') }}</textarea>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Teaching Style</label>
+                <textarea name="teaching_style" rows="3" class="w-full rounded-md border-gray-300" placeholder="Explain how you conduct sessions, assessments, and feedback.">{{ tutor_profile.teaching_style|default('') }}</textarea>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Achievements</label>
+                <textarea name="achievements" rows="3" class="w-full rounded-md border-gray-300" placeholder="Awards, mentor milestones, student success stories, etc.">{{ tutor_profile.achievements|default('') }}</textarea>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Other Certifications</label>
+                <textarea name="certifications" rows="3" class="w-full rounded-md border-gray-300" placeholder="List notable certifications & recognitions.">{{ tutor_profile.certifications|default('') }}</textarea>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow p-4 sm:p-6">
+            <h2 class="text-lg sm:text-xl font-semibold mb-4 text-gray-900 border-b border-gray-200 pb-2">Availability</h2>
+            <div class="space-y-4">
+                <label class="flex items-center">
+                    <input type="checkbox" name="is_available_online" {% if tutor_profile.is_available_online %}checked{% endif %} class="rounded border-gray-300">
+                    <span class="ml-2 text-sm text-gray-700">Available for Online Tutoring</span>
+                </label>
+                <label class="flex items-center">
+                    <input type="checkbox" name="is_available_home" {% if tutor_profile.is_available_home %}checked{% endif %} class="rounded border-gray-300">
+                    <span class="ml-2 text-sm text-gray-700">Available for Home Tutoring</span>
+                </label>
+            </div>
+        </div>
+        
+        <div class="flex justify-end gap-3 pt-4">
+            <a href="{{ url('tutors:dashboard') }}" class="px-4 sm:px-6 py-2 sm:py-3 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors text-sm sm:text-base">
+                Cancel
+            </a>
+            <button type="submit" class="bg-indigo-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-md hover:bg-indigo-700 transition-colors text-sm sm:text-base font-medium">
+                Save Profile
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{# Location map disabled for now #}
+{% if False and tutor_profile.is_available_home %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script>
+    let locationMap, locationMarker;
+    
+    function initLocationMap() {
+        const defaultLat = {{ tutor_profile.latitude|default('19.0760') }};
+        const defaultLon = {{ tutor_profile.longitude|default('72.8777') }};
+        
+        locationMap = L.map('locationMap').setView([defaultLat, defaultLon], 12);
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(locationMap);
+        
+        locationMarker = L.marker([defaultLat, defaultLon], {draggable: true}).addTo(locationMap);
+        
+        locationMarker.on('dragend', function() {
+            const pos = locationMarker.getLatLng();
+            document.getElementById('latitude').value = pos.lat.toFixed(6);
+            document.getElementById('longitude').value = pos.lng.toFixed(6);
+        });
+        
+        locationMap.on('click', function(e) {
+            locationMarker.setLatLng(e.latlng);
+            document.getElementById('latitude').value = e.latlng.lat.toFixed(6);
+            document.getElementById('longitude').value = e.latlng.lng.toFixed(6);
+        });
+        
+        const currentLat = document.getElementById('latitude').value;
+        const currentLon = document.getElementById('longitude').value;
+        if (currentLat && currentLon) {
+            locationMarker.setLatLng([parseFloat(currentLat), parseFloat(currentLon)]);
+            locationMap.setView([parseFloat(currentLat), parseFloat(currentLon)], 12);
+        }
+    }
+    
+    initLocationMap();
+</script>
+{% endif %}
+{% endblock %}
+

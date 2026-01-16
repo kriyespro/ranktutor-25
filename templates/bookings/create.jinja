@@ -1,0 +1,140 @@
+{% extends "base.jinja" %}
+
+{% block title %}Book a Lesson - RankTutor{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <h1 class="text-3xl font-bold text-gray-900 mb-6">Book a Lesson with {{ tutor_profile.user.get_full_name()|default(tutor_profile.user.username) }}</h1>
+    
+    <div class="bg-white rounded-lg shadow p-6">
+        <form method="post">
+            <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Subject</label>
+                    <select name="subject" id="subjectSelect" required class="w-full rounded-md border-gray-300 min-h-[44px] text-base">
+                        <option value="">Select a subject</option>
+                        {% if pricing_options %}
+                            {% for pricing in pricing_options %}
+                            <option value="{{ pricing.subject.id }}" data-price="{{ pricing.price_per_hour }}" data-mode="{{ pricing.mode }}">
+                                {{ pricing.subject.name }} - {{ pricing.get_mode_display() }} (₹{{ pricing.price_per_hour }}/hr)
+                            </option>
+                            {% endfor %}
+                        {% elif tutor_subjects %}
+                            {% for subject in tutor_subjects %}
+                            <option value="{{ subject.id }}" data-price="{{ default_hourly_rate }}" data-mode="online">
+                                {{ subject.name }} (₹{{ default_hourly_rate }}/hr)
+                            </option>
+                            {% endfor %}
+                        {% else %}
+                            <option value="" disabled>No subjects available. Please contact the tutor.</option>
+                        {% endif %}
+                    </select>
+                    {% if not pricing_options and not tutor_subjects %}
+                    <p class="mt-1 text-sm text-yellow-600">⚠️ This tutor hasn't set up subjects yet. Please contact them directly.</p>
+                    {% endif %}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Mode</label>
+                    <select name="mode" required class="w-full rounded-md border-gray-300">
+                        <option value="online">Online</option>
+                        <option value="home">Home Tutoring</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Date</label>
+                    <input type="date" name="lesson_date" required min="{{ today|date('Y-m-d') }}" class="w-full rounded-md border-gray-300">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Time</label>
+                    <input type="time" name="lesson_time" required class="w-full rounded-md border-gray-300">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Duration (hours)</label>
+                    <input type="number" name="duration_hours" value="1" step="0.5" min="0.5" required class="w-full rounded-md border-gray-300">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Price per hour</label>
+                    <input type="number" name="price_per_hour" id="pricePerHour" step="0.01" required class="w-full rounded-md border-gray-300 min-h-[44px] text-base" value="{{ default_hourly_rate }}">
+                    <p class="mt-1 text-xs text-gray-500">Price will be auto-filled based on selected subject</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Notes (Optional)</label>
+                    <textarea name="notes" rows="4" class="w-full rounded-md border-gray-300"></textarea>
+                </div>
+                <div>
+                    <label class="flex items-center">
+                        <input type="checkbox" name="is_trial" class="rounded border-gray-300">
+                        <span class="ml-2 text-sm text-gray-700">This is a trial class</span>
+                    </label>
+                </div>
+                <div>
+                    <label class="flex items-center">
+                        <input type="checkbox" name="is_recurring" id="isRecurring" class="rounded border-gray-300">
+                        <span class="ml-2 text-sm text-gray-700">Recurring lesson</span>
+                    </label>
+                </div>
+                <div id="recurringOptions" class="hidden">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Recurrence Pattern</label>
+                            <select name="recurrence_pattern" class="w-full rounded-md border-gray-300">
+                                <option value="">Select pattern</option>
+                                <option value="daily">Daily</option>
+                                <option value="weekly">Weekly</option>
+                                <option value="biweekly">Bi-weekly</option>
+                                <option value="monthly">Monthly</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">End Date</label>
+                            <input type="date" name="recurrence_end_date" class="w-full rounded-md border-gray-300">
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <button type="submit" class="w-full bg-indigo-600 text-white px-6 py-3 rounded-md hover:bg-indigo-700">
+                        Request Booking
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    const isRecurringCheckbox = document.getElementById('isRecurring');
+    const recurringOptions = document.getElementById('recurringOptions');
+    const subjectSelect = document.getElementById('subjectSelect');
+    const pricePerHour = document.getElementById('pricePerHour');
+    const modeSelect = document.querySelector('select[name="mode"]');
+    
+    // Auto-fill price and mode when subject is selected
+    if (subjectSelect && pricePerHour && modeSelect) {
+        subjectSelect.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            if (selectedOption.value) {
+                const price = selectedOption.getAttribute('data-price');
+                const mode = selectedOption.getAttribute('data-mode');
+                if (price) {
+                    pricePerHour.value = price;
+                }
+                if (mode) {
+                    modeSelect.value = mode;
+                }
+            }
+        });
+    }
+    
+    isRecurringCheckbox.addEventListener('change', function() {
+        if (this.checked) {
+            recurringOptions.classList.remove('hidden');
+        } else {
+            recurringOptions.classList.add('hidden');
+        }
+    });
+</script>
+{% endblock %}
+{% endblock %}
+

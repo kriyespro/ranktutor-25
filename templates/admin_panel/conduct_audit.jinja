@@ -1,0 +1,170 @@
+{% extends "base.jinja" %}
+
+{% block title %}Conduct Quality Audit - RankTutor{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-3 sm:px-4 lg:px-8 py-6 sm:py-8">
+    <div class="mb-6">
+        <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Conduct Quality Audit</h1>
+        <p class="text-sm sm:text-base text-gray-600">Review and assess tutor quality</p>
+    </div>
+    
+    <!-- Quick Resolve Intervention Button -->
+    {% if tutor.intervention_required %}
+    <div class="bg-red-50 border-2 border-red-300 rounded-lg p-4 sm:p-6 mb-6">
+        <div class="flex items-start justify-between">
+            <div class="flex-1">
+                <h3 class="text-lg font-semibold text-red-800 mb-2 flex items-center gap-2">
+                    <span>⚠️</span>
+                    <span>This tutor requires intervention</span>
+                </h3>
+                <p class="text-sm text-red-700 mb-4">Quality score is below 50/100. Review the tutor and take appropriate action.</p>
+                <form method="post" class="inline">
+                    <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+                    <input type="hidden" name="action" value="resolve_intervention">
+                    <button type="submit" class="bg-green-600 text-white px-4 py-2.5 rounded-md hover:bg-green-700 text-sm font-medium min-h-[44px]">
+                        ✅ Mark Intervention as Resolved
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        <!-- Tutor Information -->
+        <div class="lg:col-span-2 bg-white rounded-lg shadow p-4 sm:p-6">
+            <h2 class="text-lg sm:text-xl font-semibold mb-4">Tutor Information</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                <div>
+                    <p class="text-gray-500 mb-1">Name</p>
+                    <p class="font-semibold text-gray-900">{{ tutor.user.get_full_name()|default(tutor.user.username) }}</p>
+                </div>
+                <div>
+                    <p class="text-gray-500 mb-1">Location</p>
+                    <p class="font-semibold text-gray-900">{{ tutor.city }}, {{ tutor.state }}</p>
+                </div>
+                <div>
+                    <p class="text-gray-500 mb-1">Current Quality Score</p>
+                    <p class="font-semibold {% if current_score >= 80 %}text-green-600{% elif current_score >= 50 %}text-yellow-600{% else %}text-red-600{% endif %}">
+                        {{ current_score|floatformat(1) }}/100
+                    </p>
+                </div>
+                <div>
+                    <p class="text-gray-500 mb-1">Average Rating</p>
+                    <p class="font-semibold text-gray-900">{{ tutor.average_rating|default('0.0')|floatformat(1) }}/5.0</p>
+                </div>
+                <div>
+                    <p class="text-gray-500 mb-1">Total Reviews</p>
+                    <p class="font-semibold text-gray-900">{{ tutor.total_reviews }}</p>
+                </div>
+                <div>
+                    <p class="text-gray-500 mb-1">Years of Experience</p>
+                    <p class="font-semibold text-gray-900">{{ tutor.years_of_experience|default(0) }}</p>
+                </div>
+                <div>
+                    <p class="text-gray-500 mb-1">Verification Status</p>
+                    <p class="font-semibold {% if tutor.is_verified %}text-green-600{% else %}text-red-600{% endif %}">
+                        {{ 'Verified' if tutor.is_verified else 'Not Verified' }}
+                    </p>
+                </div>
+                <div>
+                    <p class="text-gray-500 mb-1">Last Audit</p>
+                    <p class="font-semibold text-gray-900">
+                        {{ tutor.last_quality_audit|date('M d, Y') if tutor.last_quality_audit else 'Never' }}
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recent Audits -->
+        <div class="bg-white rounded-lg shadow p-4 sm:p-6">
+            <h2 class="text-lg font-semibold mb-4">Recent Audits</h2>
+            {% if recent_audits %}
+            <div class="space-y-3">
+                {% for audit in recent_audits %}
+                <div class="border-l-2 {% if audit.quality_score >= 80 %}border-green-500{% elif audit.quality_score >= 50 %}border-yellow-500{% else %}border-red-500{% endif %} pl-3 py-2">
+                    <p class="text-xs text-gray-500">{{ audit.created_at|date('M d, Y') }}</p>
+                    <p class="text-sm font-semibold {% if audit.quality_score >= 80 %}text-green-600{% elif audit.quality_score >= 50 %}text-yellow-600{% else %}text-red-600{% endif %}">
+                        {{ audit.quality_score|floatformat(1) }}/100
+                    </p>
+                    {% if audit.is_resolved %}
+                    <span class="text-xs text-green-600">✅ Resolved</span>
+                    {% else %}
+                    <span class="text-xs text-yellow-600">⏳ Pending</span>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-sm text-gray-500">No previous audits</p>
+            {% endif %}
+        </div>
+    </div>
+    
+    <form method="post" class="bg-white rounded-lg shadow p-4 sm:p-6">
+        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+        <input type="hidden" name="action" value="complete_audit">
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-6">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Audit Type</label>
+                <select name="audit_type" class="w-full rounded-md border-gray-300 min-h-[44px] text-base">
+                    <option value="manual">Manual Review</option>
+                    <option value="automated">Automated Audit</option>
+                    <option value="complaint">Complaint-Based</option>
+                    <option value="scheduled">Scheduled Audit</option>
+                </select>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Manual Score Override (Optional)
+                    <span class="text-xs text-gray-500 font-normal">Leave empty to use calculated score</span>
+                </label>
+                <input type="number" name="manual_score" min="0" max="100" step="0.1" class="w-full rounded-md border-gray-300 min-h-[44px] text-base" placeholder="Auto: {{ current_score|floatformat(1) }}">
+            </div>
+        </div>
+        
+        <div class="mb-6">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Issues Found</label>
+            <textarea name="issues_found" rows="4" class="w-full rounded-md border-gray-300 text-base" placeholder="List any quality issues identified during the audit..."></textarea>
+            <p class="mt-1 text-xs text-gray-500">Be specific about what issues were found</p>
+        </div>
+        
+        <div class="mb-6">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Recommendations</label>
+            <textarea name="recommendations" rows="4" class="w-full rounded-md border-gray-300 text-base" placeholder="Provide actionable recommendations for improvement..."></textarea>
+            <p class="mt-1 text-xs text-gray-500">Suggest concrete steps the tutor can take to improve</p>
+        </div>
+        
+        <div class="mb-6">
+            <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" name="mark_resolved" class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                <span class="text-sm font-medium text-gray-700">Mark as resolved (clears intervention flag if score ≥ 50)</span>
+            </label>
+        </div>
+        
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+            <p class="text-sm font-semibold text-blue-900 mb-2">Quality Score Calculation:</p>
+            <ul class="list-disc list-inside text-xs sm:text-sm text-blue-800 space-y-1">
+                <li><strong>Profile completeness:</strong> 20 points (bio, education, experience, etc.)</li>
+                <li><strong>Verification status:</strong> 30 points (ID, academic, background checks)</li>
+                <li><strong>Ratings and reviews:</strong> 40 points (average rating × 8)</li>
+                <li><strong>Experience:</strong> 10 points (years of experience)</li>
+            </ul>
+            <p class="text-xs text-blue-700 mt-2">Current calculated score: <strong>{{ current_score|floatformat(1) }}/100</strong></p>
+        </div>
+        
+        <div class="flex flex-col sm:flex-row gap-3">
+            <button type="submit" class="flex-1 sm:flex-none bg-indigo-600 text-white px-6 py-3 rounded-md hover:bg-indigo-700 font-medium min-h-[44px] transition-colors">
+                ✅ Complete Audit
+            </button>
+            <a href="{{ url('admin_panel:quality_audits') }}" class="flex-1 sm:flex-none bg-gray-200 text-gray-700 px-6 py-3 rounded-md hover:bg-gray-300 font-medium text-center min-h-[44px] flex items-center justify-center transition-colors">
+                Cancel
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}
+

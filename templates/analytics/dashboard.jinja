@@ -1,0 +1,143 @@
+{% extends "base.jinja" %}
+
+{% block title %}Analytics Dashboard - RankTutor{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <h1 class="text-3xl font-bold text-gray-900 mb-6">Analytics Dashboard</h1>
+    
+    <!-- Key Metrics -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="text-sm font-medium text-gray-500 mb-2">Total Users</h3>
+            <p class="text-3xl font-bold text-indigo-600">{{ total_users }}</p>
+            <p class="text-sm text-gray-600 mt-2">{{ new_users_30d }} new (30d)</p>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="text-sm font-medium text-gray-500 mb-2">Total Tutors</h3>
+            <p class="text-3xl font-bold text-green-600">{{ total_tutors }}</p>
+            <p class="text-sm text-gray-600 mt-2">{{ verified_tutors_30d }} verified (30d)</p>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="text-sm font-medium text-gray-500 mb-2">Total Bookings</h3>
+            <p class="text-3xl font-bold text-blue-600">{{ total_bookings }}</p>
+            <p class="text-sm text-gray-600 mt-2">{{ bookings_30d }} (30d), {{ bookings_7d }} (7d)</p>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="text-sm font-medium text-gray-500 mb-2">Total Revenue</h3>
+            <p class="text-3xl font-bold text-purple-600">₹{{ total_revenue|floatformat(0) }}</p>
+            <p class="text-sm text-gray-600 mt-2">₹{{ revenue_30d|floatformat(0) }} (30d)</p>
+        </div>
+    </div>
+    
+    <!-- Revenue & Commission -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-xl font-semibold mb-4">Revenue Metrics</h2>
+            <div class="space-y-4">
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Total Revenue</span>
+                    <span class="font-semibold">₹{{ total_revenue|floatformat(2) }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Last 30 Days</span>
+                    <span class="font-semibold">₹{{ revenue_30d|floatformat(2) }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Last 7 Days</span>
+                    <span class="font-semibold">₹{{ revenue_7d|floatformat(2) }}</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-xl font-semibold mb-4">Commission Metrics</h2>
+            <div class="space-y-4">
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Total Commission</span>
+                    <span class="font-semibold">₹{{ total_commission|floatformat(2) }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Last 30 Days</span>
+                    <span class="font-semibold">₹{{ commission_30d|floatformat(2) }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Booking & Review Metrics -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-xl font-semibold mb-4">Booking Metrics</h2>
+            <div class="space-y-4">
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Total Bookings</span>
+                    <span class="font-semibold">{{ total_bookings }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Completed</span>
+                    <span class="font-semibold">{{ completed_bookings }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Conversion Rate</span>
+                    <span class="font-semibold">{{ conversion_rate|floatformat(1) }}%</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-xl font-semibold mb-4">Review Metrics</h2>
+            <div class="space-y-4">
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Total Reviews</span>
+                    <span class="font-semibold">{{ total_reviews }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Average Rating</span>
+                    <span class="font-semibold">{{ avg_rating|floatformat(1) }}/5.0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Top Subjects & Tutors -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-xl font-semibold mb-4">Top Subjects</h2>
+            <div class="space-y-2">
+                {% for subject in top_subjects %}
+                <div class="flex justify-between">
+                    <span>{{ subject.subject__name }}</span>
+                    <span class="font-semibold">{{ subject.count }} bookings</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-xl font-semibold mb-4">Top Tutors</h2>
+            <div class="space-y-2">
+                {% for tutor in top_tutors %}
+                <div class="flex justify-between">
+                    <span>{{ tutor.tutor__username }} ({{ tutor.tutor__tutor_profile__city }})</span>
+                    <span class="font-semibold">{{ tutor.booking_count }} bookings</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="mt-6 flex gap-4">
+        <a href="{{ url('analytics:revenue_forecast') }}" class="inline-block bg-indigo-600 text-white px-6 py-3 rounded-md hover:bg-indigo-700">
+            View Revenue Forecast →
+        </a>
+        <a href="{{ url('analytics:report_builder') }}" class="inline-block bg-green-600 text-white px-6 py-3 rounded-md hover:bg-green-700">
+            Custom Reports →
+        </a>
+    </div>
+</div>
+{% endblock %}
+

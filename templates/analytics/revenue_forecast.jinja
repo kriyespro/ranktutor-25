@@ -1,0 +1,45 @@
+{% extends "base.jinja" %}
+
+{% block title %}Revenue Forecast - RankTutor{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <h1 class="text-3xl font-bold text-gray-900 mb-6">Revenue Forecast</h1>
+    
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h2 class="text-xl font-semibold mb-4">Current Month Revenue</h2>
+        <p class="text-3xl font-bold text-indigo-600">₹{{ current_month_revenue|floatformat(2) }}</p>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="text-lg font-semibold mb-2">30-Day Forecast</h3>
+            <p class="text-2xl font-bold text-green-600">₹{{ forecast_30d|floatformat(2) }}</p>
+            <p class="text-sm text-gray-500 mt-2">Based on current trends</p>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="text-lg font-semibold mb-2">30-Day Forecast (with Growth)</h3>
+            <p class="text-2xl font-bold text-purple-600">₹{{ forecast_with_growth|floatformat(2) }}</p>
+            <p class="text-sm text-gray-500 mt-2">Assuming 5% monthly growth</p>
+        </div>
+    </div>
+    
+    <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
+        <h3 class="font-semibold mb-2">Forecast Confidence</h3>
+        <p class="text-sm text-gray-700">
+            Confidence Level: <strong>{{ confidence_level }}%</strong>
+        </p>
+        <p class="text-sm text-gray-600 mt-2">
+            This forecast is based on historical data and current trends. Actual results may vary.
+        </p>
+    </div>
+    
+    <div class="mt-6">
+        <a href="{{ url('analytics:dashboard') }}" class="inline-block bg-gray-300 text-gray-700 px-6 py-3 rounded-md hover:bg-gray-400">
+            ← Back to Dashboard
+        </a>
+    </div>
+</div>
+{% endblock %}
+

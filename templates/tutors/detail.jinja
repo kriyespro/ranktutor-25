@@ -1,0 +1,184 @@
+{% extends "base.jinja" %}
+
+{% block title %}{{ tutor_profile.user.get_full_name()|default(tutor_profile.user.username) }} - RankTutor{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-6 lg:px-10 py-10">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+        <!-- Main Column -->
+        <div class="lg:col-span-2 space-y-8">
+            <div class="bg-white rounded-3xl shadow-xl p-8">
+                <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+                    <div>
+                        <div class="flex items-center gap-2 sm:gap-3">
+                            {% if tutor_profile.is_featured %}
+                            <span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-semibold">⭐ Featured</span>
+                            {% endif %}
+                            {% if tutor_profile.is_verified %}
+                            <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold">✓ Verified</span>
+                            {% endif %}
+                        </div>
+                        <h1 class="mt-3 text-3xl font-bold text-gray-900">{{ tutor_profile.user.get_full_name()|default(tutor_profile.user.username) }}</h1>
+                        {% if tutor_profile.headline %}
+                        <p class="text-indigo-600 font-medium mt-1">{{ tutor_profile.headline }}</p>
+                        {% endif %}
+                        <p class="text-gray-600 mt-2">{{ tutor_profile.city }}, {{ tutor_profile.state }}</p>
+                        <div class="flex flex-wrap gap-3 mt-3 text-sm text-gray-500">
+                            {% if tutor_profile.years_of_experience %}
+                            <span>{{ tutor_profile.years_of_experience }}+ yrs experience</span>
+                            {% endif %}
+                            <span>{{ tutor_profile.get_teaching_levels_display() }}</span>
+                            {% if tutor_profile.languages %}<span>{{ tutor_profile.languages }}</span>{% endif %}
+                            {% if tutor_profile.hourly_rate %}<span>₹{{ tutor_profile.hourly_rate|floatformat(0) }}/hr</span>{% endif %}
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="flex items-center justify-end">
+                            <span class="text-yellow-500 text-2xl">★</span>
+                            <span class="text-2xl font-semibold ml-2">{{ tutor_profile.average_rating|default('0.0') }}</span>
+                        </div>
+                        <span class="text-gray-500 text-sm">{{ tutor_profile.total_reviews }} reviews</span>
+                    </div>
+                </div>
+
+                {% set badges = tutor_profile.get_verification_badges() %}
+                {% if badges %}
+                <div class="flex flex-wrap gap-2 mt-6">
+                    {% if 'academic' in badges %}
+                    <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-semibold">🎓 Academic Verified</span>
+                    {% endif %}
+                    {% if 'id' in badges %}
+                    <span class="px-2 py-1 bg-purple-100 text-purple-800 rounded text-xs font-semibold">🆔 ID Verified</span>
+                    {% endif %}
+                    {% if 'police' in badges %}
+                    <span class="px-2 py-1 bg-green-100 text-green-800 rounded text-xs font-semibold">👮 Police Verified</span>
+                    {% endif %}
+                    {% if 'background' in badges %}
+                    <span class="px-2 py-1 bg-indigo-100 text-indigo-800 rounded text-xs font-semibold">✓ Background Check</span>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                <div class="mt-6 space-y-6">
+                    <div>
+                        <h2 class="text-xl font-semibold text-gray-900 mb-3">About</h2>
+                        <p class="text-gray-700 leading-relaxed">{{ tutor_profile.bio|linebreaks }}</p>
+                    </div>
+                    {% if tutor_profile.education %}
+                    <div>
+                        <h2 class="text-xl font-semibold text-gray-900 mb-3">Education & Certifications</h2>
+                        <p class="text-gray-700 leading-relaxed">{{ tutor_profile.education|linebreaks }}</p>
+                    </div>
+                    {% endif %}
+                    {% if tutor_profile.experience_summary %}
+                    <div>
+                        <h2 class="text-xl font-semibold text-gray-900 mb-3">Experience Summary</h2>
+                        <p class="text-gray-700 leading-relaxed">{{ tutor_profile.experience_summary|linebreaks }}</p>
+                    </div>
+                    {% endif %}
+                    {% if tutor_profile.teaching_style %}
+                    <div>
+                        <h2 class="text-xl font-semibold text-gray-900 mb-3">Teaching Style</h2>
+                        <p class="text-gray-700 leading-relaxed">{{ tutor_profile.teaching_style|linebreaks }}</p>
+                    </div>
+                    {% endif %}
+                    {% if tutor_profile.achievements %}
+                    <div class="bg-indigo-50 border border-indigo-100 rounded-lg p-5">
+                        <h2 class="text-lg font-semibold text-indigo-700 mb-2">Achievements</h2>
+                        <p class="text-indigo-900 leading-relaxed">{{ tutor_profile.achievements|linebreaks }}</p>
+                    </div>
+                    {% endif %}
+                    {% if tutor_profile.portfolio_url %}
+                    <div>
+                        <a href="{{ tutor_profile.portfolio_url }}" target="_blank" class="inline-flex items-center text-indigo-600 hover:text-indigo-800">
+                            View Portfolio →
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="bg-white rounded-3xl shadow-xl p-6">
+                <h2 class="text-2xl.font-semibold.mb-4">Pricing</h2>
+                <div class="space-y-4">
+                    {% for pricing in pricing_options %}
+                    <div class="border border-gray-100 rounded-xl p-4 hover:border-indigo-100 transition">
+                        <p class="font-semibold text-gray-900">{{ pricing.subject.name }} · {{ pricing.get_mode_display() }}</p>
+                        <p class="text-sm text-gray-500 mt-1">Level: {{ pricing.get_level_display()|default('All levels') }}</p>
+                        <p class="text-indigo-600 font-semibold mt-2">₹{{ pricing.price_per_hour }}/hour</p>
+                    </div>
+                    {% else %}
+                    <p class="text-gray-500 text-sm">Pricing details will be shared on request.</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="bg-white rounded-3xl shadow-xl p-6">
+                <h2 class="text-2xl font-semibold mb-4">Student Reviews</h2>
+                {% if reviews %}
+                <div class="space-y-4">
+                    {% for review in reviews %}
+                    <div class="border border-gray-100 rounded-lg p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center">
+                                <span class="text-yellow-500">★</span>
+                                <span class="ml-2 font-medium">{{ review.rating }}/5</span>
+                            </div>
+                            <span class="text-sm text-gray-500">{{ review.student.get_full_name()|default(review.student.username) }}</span>
+                        </div>
+                        <p class="text-sm text-gray-700">{{ review.comment }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-gray-500">No reviews yet.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="space-y-6">
+            <div class="bg-white rounded-3xl shadow-xl p-6 text-center">
+                <div class="h-24 w-24 mx-auto rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 text-white flex items-center justify-center text-3xl font-semibold">
+                    {{ tutor_profile.user.get_full_name()|default(tutor_profile.user.username)|first|upper }}
+                </div>
+                <h3 class="mt-4 text-lg font-semibold text-gray-900">{{ tutor_profile.user.get_full_name()|default(tutor_profile.user.username) }}</h3>
+                <p class="text-sm text-gray-500">{{ tutor_profile.city }}, {{ tutor_profile.state }}</p>
+
+                <div class="mt-6 space-y-3">
+                    <a href="{{ url('bookings:create', tutor_profile.id) }}" class="block w-full bg-indigo-600 text-white px-4 py-2 rounded-md text-center hover:bg-indigo-700">
+                        Book a Lesson
+                    </a>
+                    <a href="{{ url('messaging:start_conversation', tutor_profile.user.id) }}" class="block w-full bg-white border border-indigo-600 text-indigo-600 px-4 py-2 rounded-md text-center hover:bg-indigo-50">
+                        Send Message
+                    </a>
+                </div>
+
+                <div class="mt-4 pt-4 border-t text-sm text-gray-500 space-y-2 text-left">
+                    <p>• Average response time under 4 hours</p>
+                    <p>• Offers trial sessions</p>
+                </div>
+            </div>
+
+            {% if match_score %}
+            <div class="bg-white rounded-3xl shadow-xl p-6">
+                <h2 class="text-lg font-semibold text-gray-900 mb-2">Match Score</h2>
+                <p class="text-sm text-gray-700">
+                    <span class="text-indigo-600 font-semibold">{{ match_score|floatformat(0) }}%</span> compatibility based on your profile and preferences.
+                </p>
+            </div>
+            {% endif %}
+
+            <div class="bg-white rounded-3xl shadow-xl p-6">
+                <h2 class="text-lg font-semibold text-gray-900 mb-4">Session Highlights</h2>
+                <ul class="space-y-2 text-sm text-gray-600">
+                    <li>• Personalised lesson plans and resources</li>
+                    <li>• Flexible scheduling with make-up sessions</li>
+                    <li>• Progress tracking and parent feedback</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

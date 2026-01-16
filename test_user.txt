@@ -1,0 +1,64 @@
+Test Users for RankTutor Platform
+=====================================
+
+These are test credentials for development and testing purposes.
+
+STUDENT ACCOUNTS:
+-----------------
+Email: student1@test.com
+Password: TestStudent123!
+Role: Student
+
+Email: student2@test.com
+Password: TestStudent123!
+Role: Student
+
+PARENT ACCOUNTS:
+----------------
+Email: parent1@test.com
+Password: TestParent123!
+Role: Parent
+
+Email: parent2@test.com
+Password: TestParent123!
+Role: Parent
+
+TUTOR ACCOUNTS:
+---------------
+Email: tutor1@test.com
+Password: TestTutor123!
+Role: Tutor
+
+Email: tutor2@test.com
+Password: TestTutor123!
+Role: Tutor
+
+CITY ADMIN ACCOUNTS:
+--------------------
+Email: cityadmin1@test.com
+Password: TestCityAdmin123!
+Role: City Admin
+City: Mumbai
+
+Email: cityadmin2@test.com
+Password: TestCityAdmin123!
+Role: City Admin
+City: Delhi
+
+GLOBAL ADMIN ACCOUNTS:
+----------------------
+Email: admin@ranktutor.com
+Password: Admin@RankTutor2025!
+Role: Global Admin
+
+Email: superadmin@ranktutor.com
+Password: SuperAdmin@RankTutor2025!
+Role: Global Admin
+
+NOTES:
+------
+- All passwords follow a pattern: Test[Role]123!
+- These are for development/testing only
+- Change passwords in production
+- Create these users using Django admin or management commands
+

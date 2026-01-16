@@ -1,0 +1,158 @@
+{% extends "base.jinja" %}
+
+{% block title %}{{ target_user.get_full_name()|default(target_user.username) }} - User Details{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold text-gray-900">User Details</h1>
+        <div class="flex gap-3">
+            <a href="{{ url('admin_panel:user_edit', user_id=target_user.id) }}" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700">
+                Edit User
+            </a>
+            <a href="{{ url('admin_panel:user_list') }}" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300">
+                ← Back to List
+            </a>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Main Info -->
+        <div class="lg:col-span-2 space-y-6">
+            <!-- Basic Information -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-xl font-semibold text-gray-900 mb-4">Basic Information</h2>
+                <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Username</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ target_user.username }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Email</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ target_user.email }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Full Name</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ target_user.get_full_name()|default('Not provided') }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Phone</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ target_user.phone|default('Not provided') }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Role</dt>
+                        <dd class="mt-1">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                {% if target_user.role == 'global_admin' %}bg-purple-100 text-purple-800
+                                {% elif target_user.role == 'city_admin' %}bg-blue-100 text-blue-800
+                                {% elif target_user.role == 'tutor' %}bg-green-100 text-green-800
+                                {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                {{ target_user.get_role_display() }}
+                            </span>
+                        </dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Status</dt>
+                        <dd class="mt-1">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                {% if target_user.is_active %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+                                {% if target_user.is_active %}Active{% else %}Inactive{% endif %}
+                            </span>
+                        </dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Date Joined</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ target_user.date_joined|date('M d, Y H:i') }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Last Login</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ target_user.last_login|date('M d, Y H:i')|default('Never') }}</dd>
+                    </div>
+                </dl>
+            </div>
+
+            <!-- Tutor Profile (if applicable) -->
+            {% if tutor_profile %}
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-xl font-semibold text-gray-900 mb-4">Tutor Profile</h2>
+                <div class="space-y-2">
+                    <p><strong>City:</strong> {{ tutor_profile.city }}</p>
+                    <p><strong>State:</strong> {{ tutor_profile.state }}</p>
+                    <p><strong>Verification Status:</strong> 
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                            {% if tutor_profile.is_verified %}bg-green-100 text-green-800{% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                            {{ tutor_profile.get_verification_status_display() }}
+                        </span>
+                    </p>
+                    <p><strong>Quality Score:</strong> {{ tutor_profile.quality_score|floatformat(1) }}/100</p>
+                    <a href="{{ url('admin_panel:tutor_detail', tutor_id=tutor_profile.id) }}" class="text-indigo-600 hover:text-indigo-700 text-sm">View Full Tutor Profile →</a>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Recent Bookings -->
+            {% if bookings %}
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-xl font-semibold text-gray-900 mb-4">Recent Bookings</h2>
+                <div class="space-y-3">
+                    {% for booking in bookings %}
+                    <div class="border-l-4 border-indigo-500 pl-4 py-2">
+                        <p class="text-sm font-medium text-gray-900">
+                            {% if target_user.is_tutor %}
+                            Student: {{ booking.student.get_full_name()|default(booking.student.username) }}
+                            {% else %}
+                            Tutor: {{ booking.tutor.get_full_name()|default(booking.tutor.username) }}
+                            {% endif %}
+                        </p>
+                        <p class="text-xs text-gray-500">{{ booking.created_at|date('M d, Y') }} - {{ booking.get_status_display() }}</p>
+                        <a href="{{ url('admin_panel:booking_detail', booking_id=booking.id) }}" class="text-xs text-indigo-600 hover:text-indigo-700">View Details →</a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar -->
+        <div class="space-y-6">
+            <!-- Quick Actions -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+                <div class="space-y-2">
+                    <a href="{{ url('admin_panel:user_edit', user_id=target_user.id) }}" class="block w-full bg-indigo-50 text-indigo-700 px-4 py-2 rounded-md hover:bg-indigo-100 text-center text-sm font-medium">
+                        Edit User
+                    </a>
+                    <a href="{{ url('admin_panel:user_delete', user_id=target_user.id) }}" class="block w-full bg-red-50 text-red-700 px-4 py-2 rounded-md hover:bg-red-100 text-center text-sm font-medium">
+                        Delete User
+                    </a>
+                    {% if target_user.is_tutor and tutor_profile %}
+                    <a href="{{ url('admin_panel:tutor_detail', tutor_id=tutor_profile.id) }}" class="block w-full bg-green-50 text-green-700 px-4 py-2 rounded-md hover:bg-green-100 text-center text-sm font-medium">
+                        View Tutor Profile
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Statistics -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Statistics</h3>
+                <dl class="space-y-3">
+                    <div class="flex justify-between">
+                        <dt class="text-sm text-gray-600">Total Bookings</dt>
+                        <dd class="text-sm font-medium text-gray-900">{{ bookings|length }}</dd>
+                    </div>
+                    <div class="flex justify-between">
+                        <dt class="text-sm text-gray-600">Total Payments</dt>
+                        <dd class="text-sm font-medium text-gray-900">{{ payments|length }}</dd>
+                    </div>
+                    <div class="flex justify-between">
+                        <dt class="text-sm text-gray-600">Total Reviews</dt>
+                        <dd class="text-sm font-medium text-gray-900">{{ reviews|length }}</dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

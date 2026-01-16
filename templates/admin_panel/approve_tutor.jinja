@@ -1,0 +1,52 @@
+{% extends "base.jinja" %}
+
+{% block title %}Approve Tutor - RankTutor{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <h1 class="text-3xl font-bold text-gray-900 mb-6">Approve Tutor</h1>
+    
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <div class="mb-4">
+            <p class="text-sm text-gray-500">Tutor Name</p>
+            <p class="text-lg font-semibold">{{ tutor.user.get_full_name()|default(tutor.user.username) }}</p>
+        </div>
+        <div class="mb-4">
+            <p class="text-sm text-gray-500">Email</p>
+            <p class="text-lg">{{ tutor.user.email }}</p>
+        </div>
+        <div class="mb-4">
+            <p class="text-sm text-gray-500">Location</p>
+            <p class="text-lg">{{ tutor.city }}, {{ tutor.state }}</p>
+        </div>
+        <div class="mb-4">
+            <p class="text-sm text-gray-500">Current Status</p>
+            <span class="px-3 py-1 rounded-full text-sm font-semibold 
+                {% if tutor.verification_status == 'approved' %}bg-green-100 text-green-800
+                {% elif tutor.verification_status == 'rejected' %}bg-red-100 text-red-800
+                {% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                {{ tutor.get_verification_status_display() }}
+            </span>
+        </div>
+        <div class="mb-4">
+            <a href="{{ url('tutors:detail', tutor.id) }}" target="_blank" class="text-indigo-600 hover:text-indigo-800">
+                View Full Profile →
+            </a>
+        </div>
+    </div>
+    
+    <form method="post" class="bg-white rounded-lg shadow p-6">
+        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+        <p class="text-gray-700 mb-4">Are you sure you want to approve this tutor? This will make their profile visible to students.</p>
+        <div class="flex gap-4">
+            <button type="submit" class="flex-1 bg-green-600 text-white px-6 py-3 rounded-md hover:bg-green-700">
+                Approve Tutor
+            </button>
+            <a href="{{ url('admin_panel:city_dashboard') }}" class="flex-1 bg-gray-300 text-gray-700 px-6 py-3 rounded-md hover:bg-gray-400 text-center">
+                Cancel
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}
+

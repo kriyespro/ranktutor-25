@@ -1,0 +1,311 @@
+{% extends "base.jinja" %}
+
+{% block title %}Global Admin Dashboard - RankTutor{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold text-gray-900">Global Admin Dashboard</h1>
+        <a href="/sd/" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 text-sm">
+            Django Admin →
+        </a>
+    </div>
+    
+    <!-- Statistics Overview -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
+            <h3 class="text-sm font-medium text-gray-500 uppercase">Total Users</h3>
+            <p class="text-3xl font-bold text-indigo-600 mt-2">{{ total_users }}</p>
+            <p class="text-xs text-gray-500 mt-1">{{ total_students }} students, {{ total_tutors }} tutors</p>
+        </div>
+        <div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
+            <h3 class="text-sm font-medium text-gray-500 uppercase">Total Revenue</h3>
+            <p class="text-3xl font-bold text-purple-600 mt-2">₹{{ total_revenue|floatformat(0) }}</p>
+            <p class="text-xs text-gray-500 mt-1">Commission: ₹{{ total_commission|floatformat(0) }}</p>
+        </div>
+        <div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
+            <h3 class="text-sm font-medium text-gray-500 uppercase">Total Bookings</h3>
+            <p class="text-3xl font-bold text-blue-600 mt-2">{{ total_bookings }}</p>
+            <p class="text-xs text-gray-500 mt-1">{{ verified_tutors }} verified tutors</p>
+        </div>
+        <div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
+            <h3 class="text-sm font-medium text-gray-500 uppercase">Average Rating</h3>
+            <p class="text-3xl font-bold text-green-600 mt-2">{{ avg_rating|floatformat(1) }}</p>
+            <p class="text-xs text-gray-500 mt-1">{{ total_reviews }} total reviews</p>
+        </div>
+    </div>
+    
+    <!-- Pending Items Alert -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <a href="{{ url('admin_panel:tutor_list') }}?status=pending" class="bg-orange-50 border-l-4 border-orange-500 rounded-lg shadow p-6 hover:bg-orange-100 transition-colors">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <span class="text-3xl font-bold text-orange-600">{{ pending_tutors }}</span>
+                </div>
+                <div class="ml-4">
+                    <h3 class="text-sm font-medium text-orange-800">Pending Tutors</h3>
+                    <p class="text-xs text-orange-600">Awaiting verification</p>
+                </div>
+            </div>
+        </a>
+        <a href="{{ url('admin_panel:document_list') }}?verified=false" class="bg-red-50 border-l-4 border-red-500 rounded-lg shadow p-6 hover:bg-red-100 transition-colors">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <span class="text-3xl font-bold text-red-600">{{ pending_documents }}</span>
+                </div>
+                <div class="ml-4">
+                    <h3 class="text-sm font-medium text-red-800">Pending Documents</h3>
+                    <p class="text-xs text-red-600">Need review</p>
+                </div>
+            </div>
+        </a>
+        <a href="{{ url('admin_panel:dispute_list') }}?status=open" class="bg-yellow-50 border-l-4 border-yellow-500 rounded-lg shadow p-6 hover:bg-yellow-100 transition-colors">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <span class="text-3xl font-bold text-yellow-600">{{ pending_disputes }}</span>
+                </div>
+                <div class="ml-4">
+                    <h3 class="text-sm font-medium text-yellow-800">Open Disputes</h3>
+                    <p class="text-xs text-yellow-600">Require attention</p>
+                </div>
+            </div>
+        </a>
+        <a href="{{ url('admin_panel:safety_report_list') }}?status=pending" class="bg-pink-50 border-l-4 border-pink-500 rounded-lg shadow p-6 hover:bg-pink-100 transition-colors">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <span class="text-3xl font-bold text-pink-600">{{ pending_safety_reports }}</span>
+                </div>
+                <div class="ml-4">
+                    <h3 class="text-sm font-medium text-pink-800">Safety Reports</h3>
+                    <p class="text-xs text-pink-600">Pending review</p>
+                </div>
+            </div>
+        </a>
+    </div>
+    
+    <!-- Quality Metrics -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Quality Metrics</h3>
+            <div class="space-y-3">
+                <div class="flex justify-between items-center">
+                    <span class="text-sm text-gray-600">Tutors Needing Intervention</span>
+                    <a href="{{ url('admin_panel:tutor_list') }}?search=intervention" class="text-lg font-bold text-orange-600 hover:text-orange-700">{{ tutors_needing_intervention }}</a>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-sm text-gray-600">Low Quality Tutors (Score &lt; 50)</span>
+                    <a href="{{ url('admin_panel:tutor_list') }}" class="text-lg font-bold text-red-600 hover:text-red-700">{{ low_quality_tutors }}</a>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-sm text-gray-600">Verified Tutors</span>
+                    <span class="text-lg font-bold text-green-600">{{ verified_tutors }}</span>
+                </div>
+            </div>
+            <div class="mt-4 pt-4 border-t">
+                <a href="{{ url('admin_panel:quality_audits') }}" class="text-indigo-600 hover:text-indigo-700 text-sm font-medium">
+                    View All Quality Audits →
+                </a>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
+            <div class="space-y-3">
+                <div>
+                    <h4 class="text-sm font-medium text-gray-700 mb-2">Recent Bookings</h4>
+                    <div class="space-y-2">
+                        {% for booking in recent_bookings %}
+                        <div class="text-xs text-gray-600 flex justify-between">
+                            <span>{{ booking.student.get_full_name()|default(booking.student.username) }} → {{ booking.tutor.get_full_name()|default(booking.tutor.username) }}</span>
+                            <span class="text-gray-400">{{ booking.created_at|date('M d, Y') }}</span>
+                        </div>
+                        {% else %}
+                        <p class="text-xs text-gray-400">No recent bookings</p>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="pt-3 border-t">
+                    <h4 class="text-sm font-medium text-gray-700 mb-2">Recent Payments</h4>
+                    <div class="space-y-2">
+                        {% for payment in recent_payments %}
+                        <div class="text-xs text-gray-600 flex justify-between">
+                            <span>₹{{ payment.amount|floatformat(0) }} - {{ payment.status }}</span>
+                            <span class="text-gray-400">{{ payment.created_at|date('M d, Y') }}</span>
+                        </div>
+                        {% else %}
+                        <p class="text-xs text-gray-400">No recent payments</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Admin Controls -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <!-- User Management -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+                <svg class="w-6 h-6 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                </svg>
+                User Management
+            </h2>
+            <div class="grid grid-cols-2 gap-3">
+                <a href="{{ url('admin_panel:user_list') }}" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-4 py-3 rounded-md text-sm font-medium transition-colors">
+                    All Users
+                </a>
+                <a href="{{ url('admin_panel:user_list') }}?role=student" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-4 py-3 rounded-md text-sm font-medium transition-colors">
+                    Students
+                </a>
+                <a href="{{ url('admin_panel:user_list') }}?role=tutor" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-4 py-3 rounded-md text-sm font-medium transition-colors">
+                    Tutors
+                </a>
+                <a href="{{ url('admin_panel:user_list') }}?role=city_admin" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-4 py-3 rounded-md text-sm font-medium transition-colors">
+                    City Admins
+                </a>
+            </div>
+        </div>
+        
+        <!-- Tutor Management -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+                <svg class="w-6 h-6 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                </svg>
+                Tutor Management
+            </h2>
+            <div class="grid grid-cols-2 gap-3">
+                <a href="{{ url('admin_panel:tutor_list') }}" class="bg-green-50 hover:bg-green-100 text-green-700 px-4 py-3 rounded-md text-sm font-medium transition-colors">
+                    All Tutors
+                </a>
+                <a href="{{ url('admin_panel:tutor_list') }}?status=pending" class="bg-green-50 hover:bg-green-100 text-green-700 px-4 py-3 rounded-md text-sm font-medium transition-colors">
+                    Pending Approval
+                </a>
+                <a href="{{ url('admin_panel:document_list') }}" class="bg-green-50 hover:bg-green-100 text-green-700 px-4 py-3 rounded-md text-sm font-medium transition-colors">
+                    Documents
+                </a>
+                <a href="{{ url('admin_panel:quality_audits') }}" class="bg-green-50 hover:bg-green-100 text-green-700 px-4 py-3 rounded-md text-sm font-medium transition-colors">
+                    Quality Audits
+                </a>
+            </div>
+        </div>
+        
+        <!-- Booking & Payment Management -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+                <svg class="w-6 h-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                </svg>
+                Bookings & Payments
+            </h2>
+            <div class="grid grid-cols-2 gap-3">
+                <a href="{{ url('admin_panel:booking_list') }}" class="bg-blue-50 hover:bg-blue-100 text-blue-700 px-4 py-3 rounded-md text-sm font-medium transition-colors">
+                    All Bookings
+                </a>
+                <a href="{{ url('admin_panel:payment_list') }}" class="bg-blue-50 hover:bg-blue-100 text-blue-700 px-4 py-3 rounded-md text-sm font-medium transition-colors">
+                    All Payments
+                </a>
+                <a href="{{ url('admin_panel:payment_list') }}?status=completed" class="bg-blue-50 hover:bg-blue-100 text-blue-700 px-4 py-3 rounded-md text-sm font-medium transition-colors">
+                    Completed Payments
+                </a>
+                <a href="/sd/payments/commission/" class="bg-blue-50 hover:bg-blue-100 text-blue-700 px-4 py-3 rounded-md text-sm font-medium transition-colors">
+                    Commissions
+                </a>
+            </div>
+        </div>
+        
+        <!-- Reviews & Disputes -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+                <svg class="w-6 h-6 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
+                </svg>
+                Reviews & Disputes
+            </h2>
+            <div class="grid grid-cols-2 gap-3">
+                <a href="{{ url('admin_panel:review_list') }}" class="bg-purple-50 hover:bg-purple-100 text-purple-700 px-4 py-3 rounded-md text-sm font-medium transition-colors">
+                    All Reviews
+                </a>
+                <a href="{{ url('admin_panel:dispute_list') }}" class="bg-purple-50 hover:bg-purple-100 text-purple-700 px-4 py-3 rounded-md text-sm font-medium transition-colors">
+                    Disputes
+                </a>
+                <a href="{{ url('admin_panel:dispute_list') }}?status=open" class="bg-purple-50 hover:bg-purple-100 text-purple-700 px-4 py-3 rounded-md text-sm font-medium transition-colors">
+                    Open Disputes
+                </a>
+                <a href="{{ url('admin_panel:safety_report_list') }}" class="bg-purple-50 hover:bg-purple-100 text-purple-700 px-4 py-3 rounded-md text-sm font-medium transition-colors">
+                    Safety Reports
+                </a>
+            </div>
+        </div>
+        
+        <!-- Analytics & Reports -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+                <svg class="w-6 h-6 mr-2 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                </svg>
+                Analytics & Reports
+            </h2>
+            <div class="grid grid-cols-2 gap-3">
+                <a href="/analytics/" class="bg-yellow-50 hover:bg-yellow-100 text-yellow-700 px-4 py-3 rounded-md text-sm font-medium transition-colors">
+                    Analytics Dashboard
+                </a>
+                <a href="{{ url('admin_panel:quality_audits') }}" class="bg-yellow-50 hover:bg-yellow-100 text-yellow-700 px-4 py-3 rounded-md text-sm font-medium transition-colors">
+                    Quality Audits
+                </a>
+                <a href="/sd/tutors/qualitycertification/" class="bg-yellow-50 hover:bg-yellow-100 text-yellow-700 px-4 py-3 rounded-md text-sm font-medium transition-colors">
+                    Certifications
+                </a>
+                <a href="/sd/payments/invoice/" class="bg-yellow-50 hover:bg-yellow-100 text-yellow-700 px-4 py-3 rounded-md text-sm font-medium transition-colors">
+                    Invoices
+                </a>
+            </div>
+        </div>
+        
+        <!-- System Settings -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+                <svg class="w-6 h-6 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+                System Settings
+            </h2>
+            <div class="grid grid-cols-2 gap-3">
+                <a href="/sd/" class="bg-gray-50 hover:bg-gray-100 text-gray-700 px-4 py-3 rounded-md text-sm font-medium transition-colors">
+                    Django Admin (Backup)
+                </a>
+                <a href="{{ url('admin_panel:subject_list') }}" class="bg-gray-50 hover:bg-gray-100 text-gray-700 px-4 py-3 rounded-md text-sm font-medium transition-colors">
+                    Subjects
+                </a>
+                <a href="{{ url('admin_panel:teaching_levels') }}" class="bg-gray-50 hover:bg-gray-100 text-gray-700 px-4 py-3 rounded-md text-sm font-medium transition-colors text-center">
+                    Teaching Levels
+                </a>
+                <a href="/sd/cms/page/" class="bg-gray-50 hover:bg-gray-100 text-gray-700 px-4 py-3 rounded-md text-sm font-medium transition-colors">
+                    CMS Pages
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Actions Footer -->
+    <div class="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-lg shadow-lg p-6 text-white">
+        <h2 class="text-xl font-semibold mb-4">Quick Actions</h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <a href="{{ url('admin_panel:tutor_list') }}" class="bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-md text-sm font-medium transition-colors backdrop-blur-sm">
+                Manage Tutors
+            </a>
+            <a href="{{ url('admin_panel:user_create') }}" class="bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-md text-sm font-medium transition-colors backdrop-blur-sm">
+                Add User
+            </a>
+            <a href="{{ url('admin_panel:quality_audits') }}" class="bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-md text-sm font-medium transition-colors backdrop-blur-sm">
+                Quality Audits
+            </a>
+            <a href="/analytics/" class="bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-md text-sm font-medium transition-colors backdrop-blur-sm">
+                View Analytics
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,327 @@
+{% extends "base.jinja" %}
+
+{% block title %}RankTutor - Find Your Perfect Tutor{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-6 sm:py-8 lg:py-12">
+    <!-- Hero Section - Compact -->
+    <div class="relative mb-6 sm:mb-8">
+        <div class="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-xl sm:rounded-2xl overflow-hidden">
+            <div class="absolute inset-0 opacity-10 bg-[url('https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?auto=format&fit=crop&w=1600&q=80')] bg-cover bg-center"></div>
+            <div class="relative px-4 py-4 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
+                <div class="max-w-4xl text-white mb-3 sm:mb-4">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-white/20 backdrop-blur">
+                        🚀 New: Featured tutors and smart matchmaking
+                    </span>
+                    <h1 class="mt-2 sm:mt-3 text-xl sm:text-2xl md:text-3xl lg:text-4xl font-extrabold leading-tight text-white">
+                        Personalised learning with verified tutors
+                    </h1>
+                    <p class="mt-1.5 sm:mt-2 text-xs sm:text-sm lg:text-base max-w-2xl leading-relaxed text-white/90">
+                        Discover top educators for school support, competitive exams, language mastery, and more.
+                    </p>
+                </div>
+
+                <form action="/tutors/search/" method="get" class="bg-white/95 backdrop-blur rounded-lg sm:rounded-xl shadow-xl border border-white/40 p-2 sm:p-3 lg:p-4">
+                    <!-- Large Device: All Filters in One Row -->
+                    <div class="hidden lg:flex lg:items-end lg:gap-3 mb-3">
+                        <div class="flex-1">
+                            <label class="block text-xs font-semibold text-gray-700 mb-1">📚 Subject</label>
+                            <select name="subject" class="w-full rounded-lg border-gray-300 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                <option value="">All Subjects</option>
+                                {% for subject in subjects %}
+                                <option value="{{ subject.id }}">{{ subject.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="flex-1">
+                            <label class="block text-xs font-semibold text-gray-700 mb-1">📍 Location</label>
+                            <input type="text" name="location" placeholder="City or area" class="w-full rounded-lg border-gray-300 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                        <div class="flex-1">
+                            <label class="block text-xs font-semibold text-gray-700 mb-1">🎓 Level</label>
+                            <select name="class_level" class="w-full rounded-lg border-gray-300 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                <option value="">All Levels</option>
+                                <option value="primary">Primary (1-5)</option>
+                                <option value="middle">Middle (6-8)</option>
+                                <option value="secondary">Secondary (9-10)</option>
+                                <option value="senior_secondary">Senior Secondary (11-12)</option>
+                                <option value="undergraduate">Undergraduate</option>
+                                <option value="graduate">Graduate</option>
+                                <option value="all">All Levels</option>
+                            </select>
+                        </div>
+                        <div class="flex-1">
+                            <label class="block text-xs font-semibold text-gray-700 mb-1">💻 Mode</label>
+                            <select name="mode" class="w-full rounded-lg border-gray-300 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                <option value="">All Modes</option>
+                                <option value="online">Online</option>
+                                <option value="home">Home Tutoring</option>
+                            </select>
+                        </div>
+                        <div class="flex-1">
+                            <label class="block text-xs font-bold text-gray-800 mb-1 flex items-center gap-1">
+                                <span class="text-yellow-600">⭐</span>
+                                <span>Rating</span>
+                            </label>
+                            <select name="min_rating" class="w-full rounded-lg border-2 border-amber-300 bg-white py-2 text-sm font-semibold focus:ring-2 focus:ring-amber-400">
+                                <option value="">Any Rating</option>
+                                <option value="4.5">4.5+ ⭐</option>
+                                <option value="4.0">4.0+ ⭐</option>
+                                <option value="3.5">3.5+ ⭐</option>
+                                <option value="3.0">3.0+ ⭐</option>
+                            </select>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <button type="submit" class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-2 rounded-lg shadow-lg hover:from-indigo-700 hover:to-purple-700 font-bold text-sm transition-all whitespace-nowrap">
+                                🔍 Search
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Small/Medium Device: Compact Grid Layout -->
+                    <div class="lg:hidden space-y-2 mb-3">
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-0.5">📚 Subject</label>
+                                <select name="subject" class="w-full rounded-md border-gray-300 py-1.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                    <option value="">All</option>
+                                    {% for subject in subjects %}
+                                    <option value="{{ subject.id }}">{{ subject.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-0.5">📍 Location</label>
+                                <input type="text" name="location" placeholder="City" class="w-full rounded-md border-gray-300 py-1.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-0.5">🎓 Level</label>
+                                <select name="class_level" class="w-full rounded-md border-gray-300 py-1.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                    <option value="">All</option>
+                                    <option value="primary">Primary</option>
+                                    <option value="secondary">Secondary</option>
+                                    <option value="senior_secondary">11-12</option>
+                                    <option value="undergraduate">UG</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-0.5">💻 Mode</label>
+                                <select name="mode" class="w-full rounded-md border-gray-300 py-1.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                    <option value="">All</option>
+                                    <option value="online">Online</option>
+                                    <option value="home">Home</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-800 mb-0.5 flex items-center gap-1">
+                                    <span class="text-yellow-600">⭐</span>
+                                    <span>Rating</span>
+                                </label>
+                                <select name="min_rating" class="w-full rounded-md border border-amber-300 bg-white py-1.5 text-sm font-semibold focus:ring-2 focus:ring-amber-400">
+                                    <option value="">Any</option>
+                                    <option value="4.5">4.5+</option>
+                                    <option value="4.0">4.0+</option>
+                                    <option value="3.5">3.5+</option>
+                                </select>
+                            </div>
+                            <div class="flex items-end">
+                                <button type="submit" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-4 py-1.5 rounded-md shadow-md hover:from-indigo-700 hover:to-purple-700 font-bold text-sm transition-all">
+                                    🔍 Search
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pt-2 border-t border-gray-200">
+                        <div class="text-xs sm:text-sm text-gray-600">
+                            <span class="font-semibold">Popular:</span>
+                            {% for subject in subjects[:4] %}
+                            <a href="/tutors/search/?subject={{ subject.id }}" class="text-indigo-600 hover:text-indigo-800 font-medium ml-1">{{ subject.name }}</a>{% if not loop.last %},{% endif %}
+                            {% endfor %}
+                        </div>
+                        <a href="/tutors/become-tutor/" class="text-indigo-600 hover:text-indigo-800 font-semibold text-xs sm:text-sm">
+                            Become a Tutor →
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {% if featured_tutors %}
+    <div class="mb-6 sm:mb-8">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 sm:mb-4 gap-2">
+            <div>
+                <h2 class="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">Featured Tutors</h2>
+                <p class="text-xs sm:text-sm text-gray-500 mt-0.5">Meet our highest-rated, verified tutors ready to help you succeed.</p>
+            </div>
+            <a href="/tutors/search/" class="text-indigo-600 hover:text-indigo-700 text-sm font-semibold min-h-[44px] flex items-center">
+                View all →
+            </a>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
+            {% for tutor in featured_tutors %}
+            {% set is_premium = tutor.has_premium_package() %}
+            {% set is_featured = tutor.is_featured or tutor.has_featured_subscription() %}
+            {% set is_boosted = tutor.is_premium_boosted() %}
+            <div class="bg-white rounded-lg shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden {% if is_premium %}border-2 border-purple-500 ring-2 ring-purple-200{% elif is_featured %}border-2 border-indigo-400{% elif is_boosted %}border-2 border-blue-300{% else %}border border-gray-200{% endif %} relative">
+                {% if is_premium %}
+                <!-- Premium Badge -->
+                <div class="absolute top-0 right-0 bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-3 py-1 rounded-bl-lg text-xs font-bold shadow-lg z-10">
+                    ⭐ PREMIUM
+                </div>
+                {% elif is_featured %}
+                <!-- Featured Badge -->
+                <div class="absolute top-0 right-0 bg-gradient-to-r from-indigo-500 to-blue-500 text-white px-3 py-1 rounded-bl-lg text-xs font-bold shadow-lg z-10">
+                    ⭐ FEATURED
+                </div>
+                {% elif is_boosted %}
+                <!-- Boost Badge -->
+                <div class="absolute top-0 right-0 bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-3 py-1 rounded-bl-lg text-xs font-bold shadow-lg z-10">
+                    🔥 BOOST
+                </div>
+                {% endif %}
+                <!-- Header with Avatar and Save Button -->
+                <div class="p-5 pb-3 {% if is_premium %}pt-8{% elif is_featured or is_boosted %}pt-8{% endif %}">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-3 flex-1 min-w-0">
+                            <!-- Circular Avatar -->
+                            <div class="flex-shrink-0">
+                                <div class="h-12 w-12 rounded-full {% if is_premium %}bg-gradient-to-br from-purple-600 to-indigo-600 ring-2 ring-purple-300{% elif is_featured %}bg-gradient-to-br from-indigo-500 to-blue-500 ring-2 ring-indigo-200{% elif is_boosted %}bg-gradient-to-br from-blue-400 to-cyan-400 ring-2 ring-blue-200{% else %}bg-gradient-to-br from-purple-500 to-purple-700{% endif %} text-white flex items-center justify-center text-base font-bold shadow-sm">
+                                    {{ tutor.initials }}
+                                </div>
+                            </div>
+                            <!-- Name -->
+                            <div class="flex-1 min-w-0">
+                                <a href="{{ url('tutors:detail', tutor.id) }}" class="text-sm font-semibold {% if is_premium %}text-purple-900{% else %}text-gray-900{% endif %} hover:text-purple-700 truncate block">{{ tutor.display_name }}</a>
+                            </div>
+                        </div>
+                        <!-- Save Button -->
+                        <button class="flex-shrink-0 w-8 h-8 rounded-md border border-gray-300 hover:bg-gray-50 flex items-center justify-center transition-colors text-gray-600 hover:text-gray-900">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <!-- Posted Date -->
+                    <p class="text-xs text-gray-500 mb-3">Joined {{ tutor.user.date_joined.strftime('%b %d, %Y') if tutor.user.date_joined else 'Recently' }}</p>
+                </div>
+                
+                <!-- Tutor Title/Headline -->
+                <div class="px-5 pb-3">
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">{{ tutor.headline|default(tutor.display_name + " - Tutor") }}</h3>
+                    
+                    <!-- Description/Bio -->
+                    {% if tutor.bio %}
+                    <p class="text-sm text-gray-600 line-clamp-2 leading-relaxed mb-3">{{ tutor.bio[:150] + '...' if tutor.bio|length > 150 else tutor.bio }}</p>
+                    {% else %}
+                    <p class="text-sm text-gray-600 line-clamp-2 leading-relaxed mb-3">Experienced tutor ready to help you succeed in your academic journey.</p>
+                    {% endif %}
+                </div>
+                
+                <!-- Tags -->
+                <div class="px-5 pb-3">
+                    <div class="flex flex-wrap gap-2">
+                        {% if tutor.is_available_online %}
+                        <span class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium">Online</span>
+                        {% endif %}
+                        {% if tutor.is_available_home %}
+                        <span class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium">Home Tutoring</span>
+                        {% endif %}
+                        {% if tutor.is_verified %}
+                        <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">Verified</span>
+                        {% endif %}
+                        {% for subject_name in tutor.subject_names[:2] %}
+                        <span class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium">{{ subject_name }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <!-- Compensation & Benefits -->
+                <div class="px-5 pb-4">
+                    {% if tutor.price_min is not none %}
+                    <p class="text-lg font-bold text-gray-900 mb-1">₹{{ tutor.price_min|floatformat(0) }}/hr</p>
+                    {% else %}
+                    <p class="text-lg font-bold text-gray-900 mb-1">Contact for pricing</p>
+                    {% endif %}
+                    <div class="text-xs text-gray-600 space-y-1">
+                        {% if tutor.average_rating %}
+                        <p>⭐ {{ tutor.average_rating|floatformat(1) }} rating ({{ tutor.total_reviews|default(0) }} reviews)</p>
+                        {% endif %}
+                        {% if tutor.years_of_experience %}
+                        <p>{{ tutor.years_of_experience }}+ years experience</p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Apply/View Profile Button -->
+                <div class="px-5 pb-5">
+                    <a href="{{ url('tutors:detail', tutor.id) }}" class="inline-flex items-center justify-center w-full px-4 py-2.5 bg-gray-900 text-white rounded-md hover:bg-gray-800 text-sm font-semibold transition-all shadow-sm hover:shadow-md">
+                        View Profile
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Features Section -->
+    <div class="py-8 sm:py-10 lg:py-12 bg-white">
+        <div class="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
+            <div class="text-center sm:lg:text-center">
+                <h2 class="text-sm sm:text-base text-indigo-600 font-semibold tracking-wide uppercase">Features</h2>
+                <p class="mt-2 text-2xl sm:text-3xl lg:text-4xl leading-8 font-extrabold tracking-tight text-gray-900">
+                    Why Choose RankTutor?
+                </p>
+            </div>
+
+            <div class="mt-8 sm:mt-10">
+                <div class="space-y-8 sm:space-y-10 md:space-y-0 md:grid md:grid-cols-3 md:gap-x-6 lg:gap-x-8 md:gap-y-8 lg:gap-y-10">
+                    <div class="relative pl-14 sm:pl-16">
+                        <div class="absolute left-0 top-0 flex items-center justify-center h-10 w-10 sm:h-12 sm:w-12 rounded-md bg-indigo-100 text-indigo-600 border border-indigo-200">
+                            <svg class="h-5 w-5 sm:h-6 sm:w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                        </div>
+                        <p class="text-base sm:text-lg leading-6 font-medium text-gray-900">Advanced Search</p>
+                        <p class="mt-2 text-sm sm:text-base text-gray-500 leading-relaxed">
+                            Find tutors by subject, level, mode, fee, and location. Our AI-powered matching helps you find the perfect tutor.
+                        </p>
+                    </div>
+
+                    <div class="relative pl-14 sm:pl-16">
+                        <div class="absolute left-0 top-0 flex items-center justify-center h-10 w-10 sm:h-12 sm:w-12 rounded-md bg-indigo-100 text-indigo-600 border border-indigo-200">
+                            <svg class="h-5 w-5 sm:h-6 sm:w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                            </svg>
+                        </div>
+                        <p class="text-base sm:text-lg leading-6 font-medium text-gray-900">Verified Tutors</p>
+                        <p class="mt-2 text-sm sm:text-base text-gray-500 leading-relaxed">
+                            All tutors are verified with background checks, academic credentials, and identity verification.
+                        </p>
+                    </div>
+
+                    <div class="relative pl-14 sm:pl-16">
+                        <div class="absolute left-0 top-0 flex items-center justify-center h-10 w-10 sm:h-12 sm:w-12 rounded-md bg-indigo-100 text-indigo-600 border border-indigo-200">
+                            <svg class="h-5 w-5 sm:h-6 sm:w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <p class="text-base sm:text-lg leading-6 font-medium text-gray-900">Flexible Scheduling</p>
+                        <p class="mt-2 text-sm sm:text-base text-gray-500 leading-relaxed">
+                            Book lessons at your convenience. Online or home tutoring, with real-time availability calendars.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,54 @@
+{% extends "base.jinja" %}
+
+{% block title %}Manage Availability - RankTutor{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+    <div class="mb-6">
+        <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">Manage Your Availability</h1>
+        {% include "components/tutor_menu.jinja" %}
+    </div>
+    
+    <form method="post" class="bg-white rounded-lg shadow p-6">
+        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+        <div class="space-y-4">
+            {% set days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] %}
+            {% for day_num in range(7) %}
+            <div class="flex items-center gap-4 p-4 border rounded-lg">
+                <div class="w-24">
+                    <label class="font-medium text-gray-700">{{ days[day_num] }}</label>
+                </div>
+                <div class="flex-1 grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm text-gray-500 mb-1">Start Time</label>
+                        <input type="time" name="day_{{ day_num }}_start" 
+                               value="{% if availability[day_num] %}{{ availability[day_num].start_time }}{% endif %}"
+                               class="w-full rounded-md border-gray-300">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-500 mb-1">End Time</label>
+                        <input type="time" name="day_{{ day_num }}_end"
+                               value="{% if availability[day_num] %}{{ availability[day_num].end_time }}{% endif %}"
+                               class="w-full rounded-md border-gray-300">
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="mt-6">
+            <button type="submit" class="bg-indigo-600 text-white px-6 py-3 rounded-md hover:bg-indigo-700">
+                Save Availability
+            </button>
+        </div>
+    </form>
+    
+    <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <p class="text-sm text-blue-800">
+            <strong>Tip:</strong> Leave start and end time empty for days you're not available. 
+            Students can only book lessons during your available hours.
+        </p>
+    </div>
+</div>
+{% endblock %}
+

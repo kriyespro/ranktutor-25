@@ -1,0 +1,427 @@
+{% extends "base.jinja" %}
+
+{% block title %}Tutor Dashboard - RankTutor{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6 lg:py-8">
+    <!-- Header -->
+    <div class="mb-6 sm:mb-8">
+        <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-4 tracking-tight">Tutor Dashboard</h1>
+        {% include "components/tutor_menu.jinja" %}
+    </div>
+    
+    <!-- Stats Cards Section - Compact -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
+        <!-- Profile Completion Card -->
+        <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-lg p-3 sm:p-4 border-2 border-purple-400 transform hover:scale-105 transition-transform">
+            <div class="flex items-center justify-between mb-2">
+                <div class="text-2xl">📝</div>
+                <div class="w-8 h-8 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                    <span class="text-lg">✓</span>
+                </div>
+            </div>
+            <h3 class="text-xs sm:text-sm font-bold text-purple-50 mb-2">Profile Completion</h3>
+            <div class="flex items-center justify-center mb-2">
+                <div class="relative w-16 h-16 sm:w-20 sm:h-20">
+                    <svg class="transform -rotate-90 w-16 h-16 sm:w-20 sm:h-20" viewBox="0 0 128 128">
+                        <circle cx="64" cy="64" r="56" stroke="rgba(255,255,255,0.3)" stroke-width="12" fill="none"/>
+                        <circle cx="64" cy="64" r="56" stroke="white" stroke-width="12" fill="none" 
+                                stroke-dasharray="{{ (2 * 3.14159 * 56 * profile_completion / 100)|round(2) }}, {{ (2 * 3.14159 * 56)|round(2) }}"
+                                stroke-linecap="round"
+                                class="transition-all duration-500"/>
+                    </svg>
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <span class="text-lg sm:text-xl font-extrabold text-white">{{ profile_completion }}%</span>
+                    </div>
+                </div>
+            </div>
+            {% if profile_completion < 100 %}
+            <a href="{{ url('tutors:profile_builder') }}" class="block text-center text-xs text-white font-bold bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-lg hover:bg-white/30 transition-all">
+                Complete →
+            </a>
+            {% else %}
+            <p class="text-xs text-center text-white font-bold bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-lg">Complete! 🎉</p>
+            {% endif %}
+        </div>
+        
+        <!-- Total Earnings Card -->
+        <div class="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl shadow-lg p-3 sm:p-4 border-2 border-emerald-400 transform hover:scale-105 transition-transform">
+            <div class="flex items-center justify-between mb-2">
+                <div class="text-2xl">💰</div>
+                <div class="w-8 h-8 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                    <span class="text-lg">💵</span>
+                </div>
+            </div>
+            <h3 class="text-xs sm:text-sm font-bold text-emerald-50 mb-2">Total Earnings</h3>
+            <div class="space-y-1.5 mb-2">
+                <div class="flex justify-between items-center">
+                    <span class="text-xs text-emerald-50/90 font-medium">This Week:</span>
+                    <span class="text-xs sm:text-sm font-bold text-white">₹{{ earnings_this_week|floatformat(2) }}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-xs text-emerald-50/90 font-medium">This Month:</span>
+                    <span class="text-xs sm:text-sm font-bold text-white">₹{{ earnings_this_month|floatformat(2) }}</span>
+                </div>
+                <div class="border-t border-emerald-400/50 pt-1.5 mt-1.5">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs text-emerald-50 font-semibold">Total Till Now:</span>
+                        <span class="text-sm sm:text-base font-extrabold text-white">₹{{ total_earnings|floatformat(2) }}</span>
+                    </div>
+                </div>
+            </div>
+            <a href="{{ url('payments:tutor_earnings') }}" class="block text-center text-xs text-white font-bold bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-lg hover:bg-white/30 transition-all">
+                View Details →
+            </a>
+        </div>
+        
+        <!-- Students & Bookings Combined Card -->
+        <div class="bg-white rounded-xl shadow-lg p-3 sm:p-4 border-2 border-gray-100 hover:border-purple-200 transform hover:scale-105 transition-all">
+            <div class="flex items-center justify-between mb-2">
+                <div class="text-2xl">👥</div>
+                <div class="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center">
+                    <span class="text-lg text-purple-600">📚</span>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3 mb-2">
+                <div>
+                    <h3 class="text-xs font-bold text-gray-600 mb-1">Total Students</h3>
+                    <p class="text-lg sm:text-xl font-extrabold text-gray-900">{{ total_students }}</p>
+                </div>
+                <div>
+                    <h3 class="text-xs font-bold text-gray-600 mb-1">Total Bookings</h3>
+                    <p class="text-lg sm:text-xl font-extrabold text-gray-900">{{ total_bookings }}</p>
+                </div>
+            </div>
+            <div class="mt-2">
+                <canvas id="studentsChart" height="40"></canvas>
+            </div>
+        </div>
+        
+        <!-- Average Rating Card -->
+        <div class="bg-white rounded-xl shadow-lg p-3 sm:p-4 border-2 border-gray-100 hover:border-amber-200 transform hover:scale-105 transition-all">
+            <div class="flex items-center justify-between mb-2">
+                <div class="text-2xl">⭐</div>
+                <div class="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center">
+                    <span class="text-lg text-amber-600">★</span>
+                </div>
+            </div>
+            <h3 class="text-xs sm:text-sm font-bold text-gray-900 mb-1">Average Rating</h3>
+            <p class="text-xl sm:text-2xl font-extrabold text-amber-600 mb-1">{{ current_avg_rating }}</p>
+            <p class="text-xs text-gray-500 font-medium">Current rating</p>
+            <div class="mt-2">
+                <canvas id="ratingChart" height="40"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Four Columns Section -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
+        <!-- Class Bookings Column -->
+        <div class="bg-white rounded-2xl shadow-lg p-5 sm:p-6 border-2 border-gray-100 hover:border-purple-200 transition-all transform hover:scale-105">
+            <div class="flex items-center justify-between mb-5">
+                <h3 class="text-base sm:text-lg font-extrabold text-gray-900 flex items-center gap-2">
+                    <span class="text-xl">📅</span>
+                    <span>Recent Bookings</span>
+                </h3>
+                <span class="px-3 py-1 bg-purple-100 text-purple-700 rounded-xl text-xs font-bold border border-purple-300">{{ recent_bookings|length }}</span>
+            </div>
+            <div class="space-y-3 max-h-64 overflow-y-auto">
+                {% if recent_bookings %}
+                    {% for booking in recent_bookings %}
+                    <a href="{{ url('bookings:detail', booking_id=booking.id) }}" class="block border-l-4 border-purple-500 pl-4 py-3 hover:bg-purple-50 rounded-xl transition-all mb-2 transform hover:scale-[1.02] shadow-sm hover:shadow-md">
+                        <p class="text-sm font-bold text-gray-900 mb-1">{{ booking.student.get_full_name()|default(booking.student.username) }}</p>
+                        <p class="text-xs text-gray-600 font-semibold mb-1">📚 {{ booking.subject.name }}</p>
+                        <p class="text-xs text-gray-500 font-medium mb-2">{{ booking.lesson_date|date('M d') }} at {{ booking.lesson_time|date('h:i A') }}</p>
+                        <span class="inline-block px-2.5 py-1 text-xs font-bold rounded-xl {% if booking.status == 'accepted' %}bg-emerald-100 text-emerald-800 border border-emerald-300{% elif booking.status == 'pending' %}bg-amber-100 text-amber-800 border border-amber-300{% else %}bg-gray-100 text-gray-800 border border-gray-300{% endif %}">
+                            {{ booking.get_status_display() }}
+                        </span>
+                    </a>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-sm text-gray-500 text-center py-4">No bookings yet</p>
+                {% endif %}
+            </div>
+            <a href="#pending-bookings" onclick="document.getElementById('pending-bookings').scrollIntoView({behavior: 'smooth'}); return false;" class="block mt-4 text-center text-sm text-purple-600 hover:text-purple-800 font-bold transition-colors">
+                View All →
+            </a>
+        </div>
+        
+        <!-- Payment Received Column -->
+        <div class="bg-white rounded-2xl shadow-lg p-5 sm:p-6 border-2 border-gray-100 hover:border-emerald-200 transition-all transform hover:scale-105">
+            <div class="flex items-center justify-between mb-5">
+                <h3 class="text-base sm:text-lg font-extrabold text-gray-900 flex items-center gap-2">
+                    <span class="text-xl">💰</span>
+                    <span>Payments Received</span>
+                </h3>
+                <span class="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-xl text-xs font-bold border border-emerald-300">{{ recent_payments|length }}</span>
+            </div>
+            <div class="space-y-3 max-h-64 overflow-y-auto">
+                {% if recent_payments %}
+                    {% for payment in recent_payments %}
+                    <div class="border-l-4 border-emerald-500 pl-4 py-3 hover:bg-emerald-50 rounded-xl transition-all mb-2 transform hover:scale-[1.02] shadow-sm hover:shadow-md">
+                        <p class="text-sm font-extrabold text-gray-900 mb-1">₹{{ payment.tutor_payout|floatformat(2) }}</p>
+                        <p class="text-xs text-gray-600 font-semibold mb-1">📚 {{ payment.booking.subject.name }}</p>
+                        <p class="text-xs text-gray-500 font-medium mb-2">{{ payment.created_at|date('M d, Y') }}</p>
+                        <span class="inline-block px-2.5 py-1 text-xs font-bold rounded-xl bg-emerald-100 text-emerald-800 border border-emerald-300">
+                            {{ payment.get_status_display() }}
+                        </span>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-sm text-gray-500 text-center py-4">No payments yet</p>
+                {% endif %}
+            </div>
+            <a href="{{ url('payments:tutor_earnings') }}" class="block mt-4 text-center text-sm text-emerald-600 hover:text-emerald-800 font-bold transition-colors">
+                View All →
+            </a>
+        </div>
+        
+        <!-- Messages Received Column -->
+        <div class="bg-white rounded-2xl shadow-lg p-5 sm:p-6 border-2 border-gray-100 hover:border-blue-200 transition-all transform hover:scale-105">
+            <div class="flex items-center justify-between mb-5">
+                <h3 class="text-base sm:text-lg font-extrabold text-gray-900 flex items-center gap-2">
+                    <span class="text-xl">💬</span>
+                    <span>Messages</span>
+                </h3>
+                <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-xl text-xs font-bold border border-blue-300">{{ recent_messages|length }}</span>
+            </div>
+            <div class="space-y-3 max-h-64 overflow-y-auto">
+                {% if recent_messages %}
+                    {% for message in recent_messages %}
+                    <a href="{{ url('messaging:conversation_detail', conversation_id=message.conversation.id) }}" class="block border-l-4 border-blue-500 pl-4 py-3 hover:bg-blue-50 rounded-xl transition-all mb-2 transform hover:scale-[1.02] shadow-sm hover:shadow-md">
+                        <p class="text-sm font-bold text-gray-900 mb-1">{{ message.sender.get_full_name()|default(message.sender.username) }}</p>
+                        <p class="text-xs text-gray-600 line-clamp-2 font-medium mb-1">{{ message.content|truncatewords(10) }}</p>
+                        <p class="text-xs text-gray-500 font-medium mb-2">{{ message.created_at|date('M d, h:i A') }}</p>
+                        {% if not message.is_read %}
+                        <span class="inline-block px-2.5 py-1 text-xs font-bold rounded-xl bg-blue-100 text-blue-800 border border-blue-300">
+                            New
+                        </span>
+                        {% endif %}
+                    </a>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-sm text-gray-500 text-center py-4">No messages yet</p>
+                {% endif %}
+            </div>
+            <a href="{{ url('messaging:conversations') }}" class="block mt-4 text-center text-sm text-blue-600 hover:text-blue-800 font-bold transition-colors">
+                View All →
+            </a>
+        </div>
+        
+        <!-- Upcoming Lessons Column -->
+        <div class="bg-white rounded-2xl shadow-lg p-5 sm:p-6 border-2 border-gray-100 hover:border-purple-200 transition-all transform hover:scale-105">
+            <div class="flex items-center justify-between mb-5">
+                <h3 class="text-base sm:text-lg font-extrabold text-gray-900 flex items-center gap-2">
+                    <span class="text-xl">⏰</span>
+                    <span>Upcoming Lessons</span>
+                </h3>
+                <span class="px-3 py-1 bg-purple-100 text-purple-700 rounded-xl text-xs font-bold border border-purple-300">{{ upcoming_bookings|length }}</span>
+            </div>
+            <div class="space-y-3 max-h-64 overflow-y-auto">
+                {% if upcoming_bookings %}
+                    {% for booking in upcoming_bookings %}
+                    <a href="{{ url('bookings:detail', booking_id=booking.id) }}" class="block border-l-4 border-purple-500 pl-4 py-3 hover:bg-purple-50 rounded-xl transition-all mb-2 transform hover:scale-[1.02] shadow-sm hover:shadow-md">
+                        <p class="text-sm font-bold text-gray-900 mb-1">{{ booking.student.get_full_name()|default(booking.student.username) }}</p>
+                        <p class="text-xs text-gray-600 font-semibold mb-1">📚 {{ booking.subject.name }}</p>
+                        <p class="text-xs text-gray-500 font-medium mb-2">{{ booking.lesson_date|date('M d') }} at {{ booking.lesson_time|date('h:i A') }}</p>
+                        <p class="text-xs text-purple-600 font-bold mt-1 px-2 py-1 bg-purple-100 rounded-lg inline-block border border-purple-300">{{ booking.duration_hours }}h session</p>
+                    </a>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-sm text-gray-500 text-center py-4">No upcoming lessons</p>
+                {% endif %}
+            </div>
+            <a href="#pending-bookings" onclick="document.getElementById('pending-bookings').scrollIntoView({behavior: 'smooth'}); return false;" class="block mt-4 text-center text-sm text-purple-600 hover:text-purple-800 font-bold transition-colors">
+                View All →
+            </a>
+        </div>
+    </div>
+    
+    <!-- Pending Booking Requests -->
+    {% if pending_bookings %}
+    <div id="pending-bookings" class="bg-yellow-50 border-l-4 border-yellow-400 rounded-lg shadow p-4 sm:p-5 lg:p-6 mb-4 sm:mb-6">
+        <div class="flex justify-between items-center mb-3 sm:mb-4">
+            <h2 class="text-lg sm:text-xl font-semibold text-yellow-900">
+                ⚠️ Pending Booking Requests ({{ pending_bookings_count }})
+            </h2>
+        </div>
+        <div class="space-y-3 sm:space-y-4">
+            {% for booking in pending_bookings %}
+            <div class="bg-white rounded-lg p-3 sm:p-4 border border-yellow-200 hover:shadow-md transition-shadow">
+                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
+                    <div class="flex-1 min-w-0">
+                        <div class="flex flex-wrap items-center gap-2 sm:gap-3 mb-2">
+                            <h3 class="text-base sm:text-lg font-semibold text-gray-900">
+                                {{ booking.student.get_full_name()|default(booking.student.username) }}
+                            </h3>
+                            {% if booking.is_trial %}
+                            <span class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">Trial Class</span>
+                            {% endif %}
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-gray-600">
+                            <p><strong>Subject:</strong> {{ booking.subject.name }}</p>
+                            <p><strong>Date:</strong> {{ booking.lesson_date|date('M d, Y') }}</p>
+                            <p><strong>Time:</strong> {{ booking.lesson_time|date('h:i A') }}</p>
+                            <p><strong>Duration:</strong> {{ booking.duration_hours }}h</p>
+                            <p><strong>Mode:</strong> {{ booking.get_mode_display() }}</p>
+                            <p><strong>Price:</strong> ₹{{ booking.price_per_hour|floatformat(2) }}/hr</p>
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-2 sm:ml-4 sm:flex-shrink-0">
+                        <a href="{{ url('bookings:detail', booking_id=booking.id) }}" class="w-full sm:w-auto inline-flex items-center justify-center bg-indigo-600 text-white px-4 sm:px-5 py-2.5 sm:py-3 rounded-md hover:bg-indigo-700 text-center text-sm sm:text-base font-medium whitespace-nowrap min-h-[44px] transition-colors">
+                            View Details
+                        </a>
+                        <a href="{{ url('bookings:accept', booking_id=booking.id) }}" class="w-full sm:w-auto inline-flex items-center justify-center bg-green-600 text-white px-4 sm:px-5 py-2.5 sm:py-3 rounded-md hover:bg-green-700 text-center text-sm sm:text-base font-medium whitespace-nowrap min-h-[44px] transition-colors">
+                            Accept
+                        </a>
+                        <a href="{{ url('bookings:reject', booking_id=booking.id) }}" class="w-full sm:w-auto inline-flex items-center justify-center bg-red-600 text-white px-4 sm:px-5 py-2.5 sm:py-3 rounded-md hover:bg-red-700 text-center text-sm sm:text-base font-medium whitespace-nowrap min-h-[44px] transition-colors">
+                            Reject
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Disputes Section -->
+    {% if tutor_disputes %}
+    <div class="bg-white rounded-lg shadow p-4 sm:p-5 lg:p-6 mb-4 sm:mb-6">
+        <h2 class="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Disputes</h2>
+        <div class="space-y-3 sm:space-y-4">
+            {% for dispute in tutor_disputes %}
+            <div class="border rounded-lg p-3 sm:p-4 {% if dispute.status == 'open' %}border-red-200 bg-red-50{% elif dispute.status == 'under_review' %}border-yellow-200 bg-yellow-50{% elif dispute.status == 'resolved' %}border-green-200 bg-green-50{% else %}border-gray-200 bg-gray-50{% endif %}">
+                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
+                    <div class="flex-1 min-w-0">
+                        <h3 class="text-base sm:text-lg font-semibold text-gray-900">
+                            Dispute #{{ dispute.id }} - {{ dispute.get_dispute_type_display() }}
+                        </h3>
+                        <p class="text-sm sm:text-base text-gray-600 mb-2">
+                            <strong>Booking:</strong> {{ dispute.booking.subject.name }} with {{ dispute.booking.student.get_full_name()|default(dispute.booking.student.username) }}
+                        </p>
+                        <p class="text-xs sm:text-sm text-gray-700 mb-2">
+                            <strong>Description:</strong> {{ dispute.description|truncatewords(30) }}
+                        </p>
+                    </div>
+                    <div class="sm:ml-4 sm:flex-shrink-0">
+                        <a href="{{ url('reviews:dispute_detail', dispute_id=dispute.id) }}" class="w-full sm:w-auto inline-flex items-center justify-center bg-indigo-600 text-white px-4 sm:px-5 py-2.5 sm:py-3 rounded-md hover:bg-indigo-700 text-sm sm:text-base font-medium whitespace-nowrap min-h-[44px] transition-colors">
+                            View Details
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+    
+    // Students Chart (New Students Monthly)
+    const studentsCtx = document.getElementById('studentsChart');
+    if (studentsCtx) {
+        const newStudentsData = {{ new_students_monthly|tojson }};
+        const studentsLabels = {{ students_monthly_labels|tojson }};
+        
+        new Chart(studentsCtx, {
+            type: 'bar',
+            data: {
+                labels: studentsLabels.length > 0 ? studentsLabels.slice(-6) : ['No data'],
+                datasets: [{
+                    label: 'New Students',
+                    data: newStudentsData.length > 0 ? newStudentsData.slice(-6) : [0],
+                    backgroundColor: 'rgba(79, 70, 229, 0.6)',
+                    borderColor: 'rgba(79, 70, 229, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                aspectRatio: 2,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1,
+                            font: { size: 8 }
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            font: { size: 8 },
+                            maxRotation: 45,
+                            minRotation: 45
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    // Rating Chart (Monthly Average Rating)
+    const ratingCtx = document.getElementById('ratingChart');
+    if (ratingCtx) {
+        const ratingLabels = {{ rating_labels|tojson }};
+        const ratingAverages = {{ rating_averages|tojson }};
+        
+        new Chart(ratingCtx, {
+            type: 'line',
+            data: {
+                labels: ratingLabels.length > 0 ? ratingLabels.slice(-6) : ['No data'],
+                datasets: [{
+                    label: 'Avg Rating',
+                    data: ratingAverages.length > 0 ? ratingAverages.slice(-6) : [0],
+                    borderColor: 'rgba(251, 191, 36, 1)',
+                    backgroundColor: 'rgba(251, 191, 36, 0.1)',
+                    tension: 0.4,
+                    fill: true,
+                    pointRadius: 3,
+                    pointHoverRadius: 5
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                aspectRatio: 2,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        min: 0,
+                        max: 5,
+                        ticks: {
+                            stepSize: 0.5,
+                            font: { size: 8 },
+                            callback: function(value) {
+                                return value.toFixed(1);
+                            }
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            font: { size: 8 },
+                            maxRotation: 45,
+                            minRotation: 45
+                        }
+                    }
+                }
+            }
+        });
+    }
+</script>
+{% endblock %}

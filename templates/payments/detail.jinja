@@ -1,0 +1,81 @@
+{% extends "base.jinja" %}
+
+{% block title %}Payment Details - RankTutor{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <h1 class="text-3xl font-bold text-gray-900 mb-6">Payment Details</h1>
+    
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <div class="space-y-4">
+            <div>
+                <p class="text-sm text-gray-500">Payment ID</p>
+                <p class="text-lg font-semibold">#{{ payment.id }}</p>
+            </div>
+            <div>
+                <p class="text-sm text-gray-500">Date</p>
+                <p class="text-lg font-semibold">{{ payment.created_at|date('F d, Y h:i A') }}</p>
+            </div>
+            <div>
+                <p class="text-sm text-gray-500">{% if user.is_tutor %}Student{% else %}Tutor{% endif %}</p>
+                <p class="text-lg font-semibold">
+                    {% if user.is_tutor %}{{ payment.student.get_full_name()|default(payment.student.username) }}{% else %}{{ payment.tutor.get_full_name()|default(payment.tutor.username) }}{% endif %}
+                </p>
+            </div>
+            <div>
+                <p class="text-sm text-gray-500">Booking</p>
+                <p class="text-lg font-semibold">{{ payment.booking.subject.name }} - {{ payment.booking.lesson_date }}</p>
+            </div>
+            <div>
+                <p class="text-sm text-gray-500">Amount</p>
+                <p class="text-2xl font-bold text-indigo-600">₹{{ payment.amount }}</p>
+            </div>
+            {% if user.is_tutor %}
+            <div class="border-t pt-4">
+                <p class="text-sm text-gray-500">Commission ({{ payment.commission_amount|floatformat(0) }}%)</p>
+                <p class="text-lg text-gray-600">₹{{ payment.commission_amount }}</p>
+            </div>
+            <div>
+                <p class="text-sm text-gray-500">Your Payout</p>
+                <p class="text-2xl font-bold text-green-600">₹{{ payment.tutor_payout }}</p>
+            </div>
+            {% endif %}
+            <div>
+                <p class="text-sm text-gray-500">Status</p>
+                <span class="inline-block px-3 py-1 rounded-full text-sm font-semibold
+                    {% if payment.status == 'completed' %}bg-green-100 text-green-800
+                    {% elif payment.status == 'pending' %}bg-yellow-100 text-yellow-800
+                    {% elif payment.status == 'failed' %}bg-red-100 text-red-800
+                    {% else %}bg-gray-100 text-gray-800{% endif %}">
+                    {{ payment.get_status_display() }}
+                </span>
+            </div>
+            {% if payment.transaction_id %}
+            <div>
+                <p class="text-sm text-gray-500">Transaction ID</p>
+                <p class="text-lg font-mono">{{ payment.transaction_id }}</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="flex gap-4">
+        {% if payment.status == 'completed' %}
+        <a href="{{ url('payments:generate_invoice', payment.id) }}" class="bg-indigo-600 text-white px-6 py-3 rounded-md hover:bg-indigo-700">
+            Generate Invoice
+        </a>
+        {% if not user.is_tutor %}
+        <a href="{{ url('payments:request_refund', payment.id) }}" class="bg-red-600 text-white px-6 py-3 rounded-md hover:bg-red-700">
+            Request Refund
+        </a>
+        {% endif %}
+        {% endif %}
+        {% if user.is_tutor %}
+        <a href="{{ url('payments:tutor_earnings') }}" class="bg-green-600 text-white px-6 py-3 rounded-md hover:bg-green-700">
+            View Earnings
+        </a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+

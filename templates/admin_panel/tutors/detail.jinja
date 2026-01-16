@@ -1,0 +1,193 @@
+{% extends "base.jinja" %}
+
+{% block title %}{{ tutor.user.get_full_name()|default(tutor.user.username) }} - Tutor Details{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold text-gray-900">Tutor Details</h1>
+        <div class="flex gap-3">
+            <a href="{{ url('admin_panel:tutor_edit', tutor_id=tutor.id) }}" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700">
+                Edit Tutor
+            </a>
+            <a href="{{ url('admin_panel:tutor_list') }}" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300">
+                ← Back to List
+            </a>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Main Info -->
+        <div class="lg:col-span-2 space-y-6">
+            <!-- Basic Information -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-xl font-semibold text-gray-900 mb-4">Basic Information</h2>
+                <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Name</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ tutor.user.get_full_name()|default(tutor.user.username) }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Email</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ tutor.user.email }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Phone</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ tutor.user.phone|default('Not provided') }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Headline</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ tutor.headline|default('—') }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Years of Experience</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ tutor.years_of_experience }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Languages</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ tutor.languages|default('—') }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Default Rate</dt>
+                        <dd class="mt-1 text-sm text-gray-900">
+                            {% if tutor.hourly_rate %}₹{{ tutor.hourly_rate|floatformat(0) }}/hr{% else %}—{% endif %}
+                        </dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Location</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ tutor.city }}, {{ tutor.state }} - {{ tutor.pincode }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Verification Status</dt>
+                        <dd class="mt-1">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                {% if tutor.verification_status == 'approved' %}bg-green-100 text-green-800
+                                {% elif tutor.verification_status == 'pending' %}bg-yellow-100 text-yellow-800
+                                {% else %}bg-red-100 text-red-800{% endif %}">
+                                {{ tutor.get_verification_status_display() }}
+                            </span>
+                        </dd>
+                    </div>
+                </dl>
+            </div>
+
+            <!-- Bio -->
+            {% if tutor.bio %}
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-xl font-semibold text-gray-900 mb-4">Bio</h2>
+                <p class="text-sm text-gray-700">{{ tutor.bio|linebreaks }}</p>
+            </div>
+            {% endif %}
+
+            {% if tutor.education or tutor.experience_summary or tutor.teaching_style or tutor.achievements %}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {% if tutor.education %}
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-xl font-semibold text-gray-900 mb-3">Education & Certifications</h2>
+                    <p class="text-sm text-gray-700">{{ tutor.education|linebreaks }}</p>
+                </div>
+                {% endif %}
+                {% if tutor.experience_summary %}
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-xl font-semibold text-gray-900 mb-3">Experience Summary</h2>
+                    <p class="text-sm text-gray-700">{{ tutor.experience_summary|linebreaks }}</p>
+                </div>
+                {% endif %}
+                {% if tutor.teaching_style %}
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-xl font-semibold text-gray-900 mb-3">Teaching Style</h2>
+                    <p class="text-sm text-gray-700">{{ tutor.teaching_style|linebreaks }}</p>
+                </div>
+                {% endif %}
+                {% if tutor.achievements %}
+                <div class="bg-indigo-50 border border-indigo-100 rounded-lg p-6">
+                    <h2 class="text-xl font-semibold text-indigo-700 mb-3">Achievements</h2>
+                    <p class="text-sm text-indigo-900">{{ tutor.achievements|linebreaks }}</p>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <!-- Documents -->
+            {% if documents %}
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-xl font-semibold text-gray-900 mb-4">Documents</h2>
+                <div class="space-y-3">
+                    {% for doc in documents %}
+                    <div class="border-l-4 {% if doc.is_verified %}border-green-500{% else %}border-yellow-500{% endif %} pl-4 py-2">
+                        <p class="text-sm font-medium text-gray-900">{{ doc.get_document_type_display() }}</p>
+                        <p class="text-xs text-gray-500">
+                            Status: 
+                            <span class="{% if doc.is_verified %}text-green-600{% else %}text-yellow-600{% endif %}">
+                                {% if doc.is_verified %}Verified{% else %}Pending{% endif %}
+                            </span>
+                        </p>
+                        <a href="{{ url('admin_panel:verify_document', document_id=doc.id) }}" class="text-xs text-indigo-600 hover:text-indigo-700">View/Verify →</a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Recent Bookings -->
+            {% if bookings %}
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-xl font-semibold text-gray-900 mb-4">Recent Bookings</h2>
+                <div class="space-y-3">
+                    {% for booking in bookings %}
+                    <div class="border-l-4 border-indigo-500 pl-4 py-2">
+                        <p class="text-sm font-medium text-gray-900">Student: {{ booking.student.get_full_name()|default(booking.student.username) }}</p>
+                        <p class="text-xs text-gray-500">{{ booking.created_at|date('M d, Y') }} - {{ booking.get_status_display() }}</p>
+                        <a href="{{ url('admin_panel:booking_detail', booking_id=booking.id) }}" class="text-xs text-indigo-600 hover:text-indigo-700">View Details →</a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar -->
+        <div class="space-y-6">
+            <!-- Quick Actions -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+                <div class="space-y-2">
+                    <a href="{{ url('admin_panel:tutor_edit', tutor_id=tutor.id) }}" class="block w-full bg-indigo-50 text-indigo-700 px-4 py-2 rounded-md hover:bg-indigo-100 text-center text-sm font-medium">
+                        Edit Tutor
+                    </a>
+                    <a href="{{ url('admin_panel:conduct_audit', tutor_id=tutor.id) }}" class="block w-full bg-yellow-50 text-yellow-700 px-4 py-2 rounded-md hover:bg-yellow-100 text-center text-sm font-medium">
+                        Conduct Audit
+                    </a>
+                    <a href="{{ url('admin_panel:issue_certification', tutor_id=tutor.id) }}" class="block w-full bg-green-50 text-green-700 px-4 py-2 rounded-md hover:bg-green-100 text-center text-sm font-medium">
+                        Issue Certification
+                    </a>
+                </div>
+            </div>
+
+            <!-- Statistics -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Statistics</h3>
+                <dl class="space-y-3">
+                    <div class="flex justify-between">
+                        <dt class="text-sm text-gray-600">Quality Score</dt>
+                        <dd class="text-sm font-medium text-gray-900">{{ tutor.quality_score|floatformat(1) }}/100</dd>
+                    </div>
+                    <div class="flex justify-between">
+                        <dt class="text-sm text-gray-600">Average Rating</dt>
+                        <dd class="text-sm font-medium text-gray-900">{{ tutor.average_rating|floatformat(1) }}/5</dd>
+                    </div>
+                    <div class="flex justify-between">
+                        <dt class="text-sm text-gray-600">Total Reviews</dt>
+                        <dd class="text-sm font-medium text-gray-900">{{ tutor.total_reviews }}</dd>
+                    </div>
+                    <div class="flex justify-between">
+                        <dt class="text-sm text-gray-600">Total Bookings</dt>
+                        <dd class="text-sm font-medium text-gray-900">{{ bookings|length }}</dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

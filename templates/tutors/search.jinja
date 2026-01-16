@@ -1,0 +1,338 @@
+{% extends "base.jinja" %}
+
+{% block title %}Find Tutors - RankTutor{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+    #map { 
+        height: 300px; 
+        width: 100%; 
+    }
+    @media (min-width: 640px) {
+        #map { 
+            height: 400px; 
+        }
+    }
+    .tutor-card {
+        font-size: 16px;
+    }
+    .highlight-rating {
+        background: #fef3c7;
+        color: #92400e;
+        padding: 0.25rem 0.625rem;
+        border-radius: 0.375rem;
+        font-weight: 600;
+        font-size: 0.875rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.125rem;
+        border: 1px solid #fde68a;
+    }
+    .highlight-fees {
+        background: #d1fae5;
+        color: #065f46;
+        padding: 0.25rem 0.625rem;
+        border-radius: 0.375rem;
+        font-weight: 600;
+        font-size: 0.875rem;
+        border: 1px solid #a7f3d0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+{% set selected_subject = request.GET.get('subject') %}
+{% set selected_mode = request.GET.get('mode') %}
+{% set city_query = request.GET.get('city', '') %}
+{% set location_query = request.GET.get('location', '') %}
+{% set min_price = request.GET.get('min_price', '') %}
+{% set max_price = request.GET.get('max_price', '') %}
+{% set min_rating = request.GET.get('min_rating', '') %}
+{% set class_level = request.GET.get('class_level', '') %}
+{% set lat_query = request.GET.get('lat') %}
+{% set lon_query = request.GET.get('lon') %}
+{% set max_distance = request.GET.get('max_distance', '10') %}
+<div class="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6 lg:py-8">
+    <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-4 sm:mb-6">Find Your Perfect Tutor</h1>
+    
+    <div class="bg-white rounded-lg shadow-lg p-4 sm:p-5 lg:p-6 mb-4 sm:mb-6">
+        <form method="get" id="searchForm" class="space-y-4">
+            <!-- Main Filters Row -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                <div>
+                    <label class="block text-sm sm:text-base font-semibold text-gray-700 mb-2">📚 Subject</label>
+                    <select name="subject" class="w-full rounded-md border-gray-300 min-h-[44px] text-base focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="">All Subjects</option>
+                        {% for subject in subjects %}
+                        <option value="{{ subject.id }}" {% if selected_subject|string == subject.id|string %}selected{% endif %}>{{ subject.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm sm:text-base font-semibold text-gray-700 mb-2">📍 Location/City</label>
+                    <input type="text" name="location" placeholder="City or area" value="{{ location_query }}" class="w-full rounded-md border-gray-300 min-h-[44px] text-base focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-sm sm:text-base font-semibold text-gray-700 mb-2">🎓 Class Level</label>
+                    <select name="class_level" class="w-full rounded-md border-gray-300 min-h-[44px] text-base focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="">All Levels</option>
+                        <option value="primary" {% if class_level == 'primary' %}selected{% endif %}>Primary (1-5)</option>
+                        <option value="middle" {% if class_level == 'middle' %}selected{% endif %}>Middle (6-8)</option>
+                        <option value="secondary" {% if class_level == 'secondary' %}selected{% endif %}>Secondary (9-10)</option>
+                        <option value="senior_secondary" {% if class_level == 'senior_secondary' %}selected{% endif %}>Senior Secondary (11-12)</option>
+                        <option value="undergraduate" {% if class_level == 'undergraduate' %}selected{% endif %}>Undergraduate</option>
+                        <option value="graduate" {% if class_level == 'graduate' %}selected{% endif %}>Graduate</option>
+                        <option value="all" {% if class_level == 'all' %}selected{% endif %}>All Levels</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm sm:text-base font-semibold text-gray-700 mb-2">💻 Mode</label>
+                    <select name="mode" id="modeSelect" class="w-full rounded-md border-gray-300 min-h-[44px] text-base focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="">All Modes</option>
+                        <option value="online" {% if selected_mode == 'online' %}selected{% endif %}>Online</option>
+                        <option value="home" {% if selected_mode == 'home' %}selected{% endif %}>Home Tutoring</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- Highlighted Filters: Rating & Fees -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 bg-gradient-to-r from-yellow-50 to-green-50 p-4 rounded-lg border-2 border-yellow-200">
+                <div class="sm:col-span-1">
+                    <label class="block text-sm sm:text-base font-bold text-gray-800 mb-2 flex items-center gap-2">
+                        <span class="text-yellow-600 text-xl">⭐</span>
+                        <span>Tutor Rating (Min)</span>
+                    </label>
+                    <select name="min_rating" class="w-full rounded-md border-2 border-yellow-300 bg-white min-h-[44px] text-base font-semibold focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500">
+                        <option value="">Any Rating</option>
+                        <option value="4.5" {% if min_rating == '4.5' %}selected{% endif %}>4.5+ ⭐</option>
+                        <option value="4.0" {% if min_rating == '4.0' %}selected{% endif %}>4.0+ ⭐</option>
+                        <option value="3.5" {% if min_rating == '3.5' %}selected{% endif %}>3.5+ ⭐</option>
+                        <option value="3.0" {% if min_rating == '3.0' %}selected{% endif %}>3.0+ ⭐</option>
+                    </select>
+                </div>
+                <div class="sm:col-span-1">
+                    <label class="block text-sm sm:text-base font-bold text-gray-800 mb-2 flex items-center gap-2">
+                        <span class="text-green-600 text-xl">💰</span>
+                        <span>Fees Per Hour (Min ₹)</span>
+                    </label>
+                    <input type="number" name="min_price" placeholder="Min amount" value="{{ min_price }}" min="0" step="100" class="w-full rounded-md border-2 border-green-300 bg-white min-h-[44px] text-base font-semibold focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                </div>
+                <div class="sm:col-span-1">
+                    <label class="block text-sm sm:text-base font-bold text-gray-800 mb-2 flex items-center gap-2">
+                        <span class="text-green-600 text-xl">💰</span>
+                        <span>Fees Per Hour (Max ₹)</span>
+                    </label>
+                    <input type="number" name="max_price" placeholder="Max amount" value="{{ max_price }}" min="0" step="100" class="w-full rounded-md border-2 border-green-300 bg-white min-h-[44px] text-base font-semibold focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                </div>
+                <div class="sm:col-span-1 flex items-end">
+                    <button type="submit" class="w-full bg-gradient-to-r from-purple-600 to-purple-700 text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl hover:from-purple-700 hover:to-purple-800 text-sm sm:text-base font-bold min-h-[44px] transition-all shadow-lg hover:shadow-xl transform hover:scale-105">
+                        🔍 Search Tutors
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Map for Home Tutoring -->
+            <div id="mapContainer" class="mt-4 {% if selected_mode != 'home' %}hidden{% endif %}">
+                <label class="block text-sm sm:text-base font-medium text-gray-700 mb-2">Select Your Location (for Home Tutoring)</label>
+                <div id="map" class="rounded-lg overflow-hidden"></div>
+                <input type="hidden" name="lat" id="userLat" value="{{ lat_query }}">
+                <input type="hidden" name="lon" id="userLon" value="{{ lon_query }}">
+                <div class="mt-3">
+                    <label class="block text-sm sm:text-base font-medium text-gray-700 mb-2">Maximum Distance (km)</label>
+                    <input type="number" name="max_distance" id="maxDistance" value="{{ max_distance|default('10') }}" min="1" max="50" class="w-full rounded-md border-gray-300 min-h-[44px] text-base focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+            </div>
+        </form>
+    </div>
+    
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
+        {% for tutor in tutors %}
+        {% set is_premium = tutor.has_premium_package() %}
+        {% set is_featured = tutor.is_featured or tutor.has_featured_subscription() %}
+        {% set is_boosted = tutor.is_premium_boosted() %}
+        <div class="bg-white rounded-lg shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden tutor-card {% if is_premium %}border-2 border-purple-500 ring-2 ring-purple-200{% elif is_featured %}border-2 border-indigo-400{% elif is_boosted %}border-2 border-blue-300{% else %}border border-gray-200{% endif %} relative">
+            {% if is_premium %}
+            <!-- Premium Badge -->
+            <div class="absolute top-0 right-0 bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-3 py-1 rounded-bl-lg text-xs font-bold shadow-lg z-10">
+                ⭐ PREMIUM
+            </div>
+            {% elif is_featured %}
+            <!-- Featured Badge -->
+            <div class="absolute top-0 right-0 bg-gradient-to-r from-indigo-500 to-blue-500 text-white px-3 py-1 rounded-bl-lg text-xs font-bold shadow-lg z-10">
+                ⭐ FEATURED
+            </div>
+            {% elif is_boosted %}
+            <!-- Boost Badge -->
+            <div class="absolute top-0 right-0 bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-3 py-1 rounded-bl-lg text-xs font-bold shadow-lg z-10">
+                🔥 BOOST
+            </div>
+            {% endif %}
+            <!-- Header with Avatar and Save Button -->
+            <div class="p-5 pb-3 {% if is_premium %}pt-8{% elif is_featured or is_boosted %}pt-8{% endif %}">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center gap-3 flex-1 min-w-0">
+                        <!-- Circular Avatar -->
+                        <div class="flex-shrink-0">
+                            <div class="h-12 w-12 rounded-full {% if is_premium %}bg-gradient-to-br from-purple-600 to-indigo-600 ring-2 ring-purple-300{% elif is_featured %}bg-gradient-to-br from-indigo-500 to-blue-500 ring-2 ring-indigo-200{% elif is_boosted %}bg-gradient-to-br from-blue-400 to-cyan-400 ring-2 ring-blue-200{% else %}bg-gradient-to-br from-purple-500 to-purple-700{% endif %} text-white flex items-center justify-center text-base font-bold shadow-sm">
+                                {{ tutor.user.get_full_name()|default(tutor.user.username)|first|upper }}
+                            </div>
+                        </div>
+                        <!-- Name -->
+                        <div class="flex-1 min-w-0">
+                            <a href="{{ url('tutors:detail', tutor.id) }}" class="text-sm font-semibold {% if is_premium %}text-purple-900{% else %}text-gray-900{% endif %} hover:text-purple-700 truncate block">{{ tutor.user.get_full_name()|default(tutor.user.username) }}</a>
+                        </div>
+                    </div>
+                    <!-- Save Button -->
+                    <button class="flex-shrink-0 w-8 h-8 rounded-md border border-gray-300 hover:bg-gray-50 flex items-center justify-center transition-colors text-gray-600 hover:text-gray-900">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path>
+                        </svg>
+                    </button>
+                </div>
+                
+                <!-- Posted Date -->
+                <p class="text-xs text-gray-500 mb-3">Joined {{ tutor.user.date_joined.strftime('%b %d, %Y') if tutor.user.date_joined else 'Recently' }}</p>
+            </div>
+            
+            <!-- Tutor Title/Headline -->
+            <div class="px-5 pb-3">
+                <h3 class="text-xl font-bold text-gray-900 mb-2">{{ tutor.headline|default(tutor.user.get_full_name()|default(tutor.user.username) + " - Tutor") }}</h3>
+                
+                <!-- Description/Bio -->
+                {% if tutor.bio %}
+                <p class="text-sm text-gray-600 line-clamp-2 leading-relaxed mb-3">{{ tutor.bio[:150] + '...' if tutor.bio|length > 150 else tutor.bio }}</p>
+                {% else %}
+                <p class="text-sm text-gray-600 line-clamp-2 leading-relaxed mb-3">Experienced tutor ready to help you succeed in your academic journey.</p>
+                {% endif %}
+            </div>
+            
+            <!-- Tags -->
+            <div class="px-5 pb-3">
+                <div class="flex flex-wrap gap-2">
+                    {% if tutor.is_available_online %}
+                    <span class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium">Online</span>
+                    {% endif %}
+                    {% if tutor.is_available_home %}
+                    <span class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium">Home Tutoring</span>
+                    {% endif %}
+                    {% if tutor.is_verified %}
+                    <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">Verified</span>
+                    {% endif %}
+                    {% for subject in tutor.subjects.all()[:2] %}
+                    <span class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium">{{ subject.name }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Compensation & Benefits -->
+            <div class="px-5 pb-4">
+                {% if tutor.hourly_rate %}
+                <p class="text-lg font-bold text-gray-900 mb-1">₹{{ tutor.hourly_rate|floatformat(0) }}/hr</p>
+                {% else %}
+                <p class="text-lg font-bold text-gray-900 mb-1">Contact for pricing</p>
+                {% endif %}
+                <div class="text-xs text-gray-600 space-y-1">
+                    {% if tutor.average_rating %}
+                    <p>⭐ {{ tutor.average_rating|floatformat(1) }} rating ({{ tutor.total_reviews|default(0) }} reviews)</p>
+                    {% endif %}
+                    {% if tutor.years_of_experience %}
+                    <p>{{ tutor.years_of_experience }}+ years experience</p>
+                    {% endif %}
+                    {% if tutor.city %}
+                    <p>📍 {{ tutor.city }}{% if tutor.state %}, {{ tutor.state }}{% endif %}{% if tutor.distance %} • {{ tutor.distance|floatformat(1) }} km away{% endif %}</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Apply/View Profile Button -->
+            <div class="px-5 pb-5">
+                <a href="{{ url('tutors:detail', tutor.id) }}" class="inline-flex items-center justify-center w-full px-4 py-2.5 bg-gray-900 text-white rounded-md hover:bg-gray-800 text-sm font-semibold transition-all shadow-sm hover:shadow-md">
+                    View Profile
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+        {% if not tutors %}
+        <div class="col-span-1 sm:col-span-2 lg:col-span-3 text-center py-8 sm:py-12">
+            <p class="text-sm sm:text-base text-gray-500">No tutors found. Try adjusting your search criteria.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    let map, marker;
+    const modeSelect = document.getElementById('modeSelect');
+    const mapContainer = document.getElementById('mapContainer');
+    const userLat = document.getElementById('userLat');
+    const userLon = document.getElementById('userLon');
+    
+    // Show/hide map based on mode
+    modeSelect.addEventListener('change', function() {
+        if (this.value === 'home') {
+            mapContainer.classList.remove('hidden');
+            if (!map) {
+                initMap();
+            }
+        } else {
+            mapContainer.classList.add('hidden');
+        }
+    });
+    
+    function initMap() {
+        // Default to Mumbai if no location
+        const defaultLat = {{ user_lat|default('19.0760') }};
+        const defaultLon = {{ user_lon|default('72.8777') }};
+        
+        map = L.map('map').setView([defaultLat, defaultLon], 12);
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+        
+        // Add marker
+        marker = L.marker([defaultLat, defaultLon], {draggable: true}).addTo(map);
+        
+        // Update hidden inputs on marker drag
+        marker.on('dragend', function(e) {
+            const pos = marker.getLatLng();
+            userLat.value = pos.lat.toFixed(6);
+            userLon.value = pos.lng.toFixed(6);
+        });
+        
+        // Update on click
+        map.on('click', function(e) {
+            marker.setLatLng(e.latlng);
+            userLat.value = e.latlng.lat.toFixed(6);
+            userLon.value = e.latlng.lng.toFixed(6);
+        });
+        
+        // Update form with current values
+        if (userLat.value && userLon.value) {
+            marker.setLatLng([parseFloat(userLat.value), parseFloat(userLon.value)]);
+            map.setView([parseFloat(userLat.value), parseFloat(userLon.value)], 12);
+        } else {
+            // Try to get user's location
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    marker.setLatLng([lat, lon]);
+                    map.setView([lat, lon], 12);
+                    userLat.value = lat.toFixed(6);
+                    userLon.value = lon.toFixed(6);
+                });
+            }
+        }
+    }
+    
+    // Initialize map if home mode is selected
+    if (modeSelect.value === 'home') {
+        initMap();
+    }
+</script>
+{% endblock %}

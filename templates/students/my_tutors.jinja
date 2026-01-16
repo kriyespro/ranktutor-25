@@ -1,0 +1,144 @@
+{% extends "base.jinja" %}
+
+{% block title %}My Tutors - RankTutor{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6 lg:py-8">
+    <div class="mb-6 sm:mb-8">
+        <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-4 tracking-tight">My Tutors</h1>
+        {% include "components/student_menu.jinja" %}
+    </div>
+    
+    {% if tutors_with_info %}
+    <div class="mb-4 sm:mb-6">
+        <p class="text-base sm:text-lg text-gray-600">
+            You have learned from <strong class="text-orange-600">{{ total_tutors }}</strong> tutor{{ 's' if total_tutors != 1 else '' }}
+        </p>
+    </div>
+    
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
+        {% for tutor_info in tutors_with_info %}
+        {% set tutor = tutor_info.tutor_profile %}
+        <div class="bg-white rounded-lg shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-200 overflow-hidden">
+            <!-- Header with Avatar and Save Button -->
+            <div class="p-5 pb-3">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center gap-3 flex-1 min-w-0">
+                        <!-- Circular Avatar -->
+                        <div class="flex-shrink-0">
+                            <div class="h-12 w-12 rounded-full bg-gradient-to-br from-purple-500 to-purple-700 text-white flex items-center justify-center text-base font-bold shadow-sm">
+                                {{ tutor.user.get_full_name()|default(tutor.user.username)|first|upper }}
+                            </div>
+                        </div>
+                        <!-- Name -->
+                        <div class="flex-1 min-w-0">
+                            <a href="{{ url('tutors:detail', tutor.id) }}" class="text-sm font-semibold text-gray-900 hover:text-purple-700 truncate block">{{ tutor.user.get_full_name()|default(tutor.user.username) }}</a>
+                        </div>
+                    </div>
+                    <!-- Save Button -->
+                    <button class="flex-shrink-0 w-8 h-8 rounded-md border border-gray-300 hover:bg-gray-50 flex items-center justify-center transition-colors text-gray-600 hover:text-gray-900">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path>
+                        </svg>
+                    </button>
+                </div>
+                
+                <!-- Classes Info -->
+                <div class="text-xs text-gray-600 space-y-1">
+                    <p>📚 <strong>{{ tutor_info.total_classes }}</strong> class{{ 'es' if tutor_info.total_classes != 1 else '' }} total
+                        {% if tutor_info.completed_classes > 0 %}
+                        ({{ tutor_info.completed_classes }} completed)
+                        {% endif %}
+                    </p>
+                    {% if tutor_info.last_class_date %}
+                    <p>📅 Last class: {{ tutor_info.last_class_date.strftime('%b %d, %Y') if tutor_info.last_class_date else 'N/A' }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Tutor Title/Headline -->
+            <div class="px-5 pb-3">
+                <h3 class="text-xl font-bold text-gray-900 mb-2">{{ tutor.headline|default(tutor.user.get_full_name()|default(tutor.user.username) + " - Tutor") }}</h3>
+                
+                <!-- Description/Bio -->
+                {% if tutor.bio %}
+                <p class="text-sm text-gray-600 line-clamp-2 leading-relaxed mb-3">{{ tutor.bio[:150] + '...' if tutor.bio|length > 150 else tutor.bio }}</p>
+                {% else %}
+                <p class="text-sm text-gray-600 line-clamp-2 leading-relaxed mb-3">Experienced tutor ready to help you succeed in your academic journey.</p>
+                {% endif %}
+            </div>
+            
+            <!-- Tags -->
+            <div class="px-5 pb-3">
+                <div class="flex flex-wrap gap-2 mb-2">
+                    {% if tutor.is_available_online %}
+                    <span class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium">Online</span>
+                    {% endif %}
+                    {% if tutor.is_available_home %}
+                    <span class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium">Home Tutoring</span>
+                    {% endif %}
+                    {% if tutor.is_verified %}
+                    <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">Verified</span>
+                    {% endif %}
+                </div>
+                {% if tutor_info.subjects_taught %}
+                <div class="flex flex-wrap gap-2">
+                    <span class="text-xs text-gray-500 font-medium">Subjects:</span>
+                    {% for subject in tutor_info.subjects_taught[:3] %}
+                    <span class="px-3 py-1 bg-orange-100 text-orange-800 rounded-full text-xs font-medium">{{ subject }}</span>
+                    {% endfor %}
+                    {% if tutor_info.subjects_taught|length > 3 %}
+                    <span class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium">+{{ tutor_info.subjects_taught|length - 3 }} more</span>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Compensation & Benefits -->
+            <div class="px-5 pb-4">
+                {% if tutor.hourly_rate %}
+                <p class="text-lg font-bold text-gray-900 mb-1">₹{{ tutor.hourly_rate|floatformat(0) }}/hr</p>
+                {% else %}
+                <p class="text-lg font-bold text-gray-900 mb-1">Contact for pricing</p>
+                {% endif %}
+                <div class="text-xs text-gray-600 space-y-1">
+                    {% if tutor.average_rating %}
+                    <p>⭐ {{ tutor.average_rating|floatformat(1) }} rating ({{ tutor.total_reviews|default(0) }} reviews)</p>
+                    {% endif %}
+                    {% if tutor.years_of_experience %}
+                    <p>{{ tutor.years_of_experience }}+ years experience</p>
+                    {% endif %}
+                    {% if tutor.city %}
+                    <p>📍 {{ tutor.city }}{% if tutor.state %}, {{ tutor.state }}{% endif %}</p>
+                    {% endif %}
+                </div>
+                {% if tutor_info.has_reviewed %}
+                <div class="mt-2 pt-2 border-t border-gray-100">
+                    <p class="text-xs text-green-600 font-medium">✓ You've reviewed this tutor</p>
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Apply/View Profile Button -->
+            <div class="px-5 pb-5">
+                <a href="{{ url('tutors:detail', tutor.id) }}" class="inline-flex items-center justify-center w-full px-4 py-2.5 bg-gray-900 text-white rounded-md hover:bg-gray-800 text-sm font-semibold transition-all shadow-sm hover:shadow-md">
+                    View Profile
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="bg-white rounded-lg shadow-sm p-8 sm:p-12 text-center">
+        <div class="text-6xl mb-4">👨‍🏫</div>
+        <h2 class="text-2xl font-bold text-gray-900 mb-2">No Tutors Yet</h2>
+        <p class="text-gray-600 mb-6">You haven't taken any classes yet. Start by finding a tutor!</p>
+        <a href="{{ url('tutors:search') }}" class="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg hover:from-indigo-600 hover:to-indigo-700 text-base sm:text-lg font-bold min-h-[52px] transition-all shadow-lg hover:shadow-xl transform hover:scale-105">
+            <span class="text-xl">🔍</span>
+            <span>Find Tutors</span>
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+

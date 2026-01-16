@@ -1,0 +1,85 @@
+{% extends "base.jinja" %}
+
+{% block title %}Payment - RankTutor{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+    <div class="bg-white rounded-lg shadow-lg p-6 sm:p-8 mb-6">
+        <div class="text-center mb-6">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-indigo-100 mb-4">
+                <svg class="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                </svg>
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Complete Your Payment</h1>
+            <p class="text-gray-600">Activate your {{ feature_name }}</p>
+        </div>
+        
+        <div class="bg-gray-50 rounded-lg p-6 mb-6">
+            <div class="space-y-4">
+                <div class="flex justify-between items-center pb-4 border-b border-gray-200">
+                    <span class="text-gray-700 font-medium">Feature:</span>
+                    <span class="text-gray-900 font-semibold">{{ feature_name }}</span>
+                </div>
+                <div class="flex justify-between items-center pb-4 border-b border-gray-200">
+                    <span class="text-gray-700 font-medium">Duration:</span>
+                    <span class="text-gray-900 font-semibold">30 days</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-lg font-semibold text-gray-900">Total Amount:</span>
+                    <span class="text-2xl font-bold text-indigo-600">₹{{ premium_payment.amount|floatformat(0) }}</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Dummy Payment Method Selection -->
+        <div class="mb-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Payment Method</h3>
+            <div class="space-y-3">
+                <label class="flex items-center p-4 border-2 border-indigo-500 rounded-lg cursor-pointer bg-indigo-50">
+                    <input type="radio" name="payment_method" value="dummy" checked class="w-5 h-5 text-indigo-600 border-gray-300 focus:ring-indigo-500">
+                    <div class="ml-3 flex-1">
+                        <div class="flex items-center justify-between">
+                            <span class="font-semibold text-gray-900">Dummy Payment Gateway</span>
+                            <span class="text-sm text-gray-500">Test Mode</span>
+                        </div>
+                        <p class="text-sm text-gray-600 mt-1">This is a test payment. No actual charge will be made.</p>
+                    </div>
+                </label>
+            </div>
+        </div>
+        
+        <form method="post" class="space-y-4">
+            <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+            
+            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                <div class="flex items-start">
+                    <svg class="w-5 h-5 text-yellow-600 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                    </svg>
+                    <div class="text-sm text-yellow-800">
+                        <p class="font-semibold mb-1">Test Payment Mode</p>
+                        <p>This is a dummy payment. Click "Confirm Payment" to simulate a successful payment and activate your premium feature.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex gap-4">
+                <button type="submit" name="action" value="confirm" class="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-3 rounded-lg hover:from-indigo-700 hover:to-purple-700 font-semibold transition-all shadow-lg hover:shadow-xl transform hover:scale-105">
+                    ✓ Confirm Payment
+                </button>
+                <button type="submit" name="action" value="cancel" class="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-semibold transition-all">
+                    Cancel
+                </button>
+            </div>
+        </form>
+        
+        <div class="mt-6 text-center">
+            <a href="{{ url('tutors:premium_features') }}" class="text-indigo-600 hover:text-indigo-800 text-sm font-medium">
+                ← Back to Premium Features
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

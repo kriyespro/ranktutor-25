@@ -1,0 +1,51 @@
+{% extends "base.jinja" %}
+
+{% block title %}Review Details - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold text-gray-900">Review Details</h1>
+        <a href="{{ url('admin_panel:review_list') }}" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300">
+            ← Back to List
+        </a>
+    </div>
+
+    <div class="bg-white rounded-lg shadow p-6 space-y-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <h2 class="text-xl font-semibold text-gray-900">Rating</h2>
+                <div class="flex items-center mt-2">
+                    {% for i in [1, 2, 3, 4, 5] %}
+                    <span class="text-2xl {% if i <= review.rating %}text-yellow-400{% else %}text-gray-300{% endif %}">★</span>
+                    {% endfor %}
+                    <span class="ml-2 text-lg font-medium text-gray-900">{{ review.rating }}/5</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="border-t pt-6">
+            <h3 class="text-sm font-medium text-gray-500 mb-2">Comment</h3>
+            <p class="text-sm text-gray-900">{{ review.comment|default('No comment provided')|linebreaks }}</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 border-t pt-6">
+            <div>
+                <h3 class="text-sm font-medium text-gray-500 mb-2">Student</h3>
+                <p class="text-sm text-gray-900">{{ review.student.get_full_name()|default(review.student.username) }}</p>
+                <p class="text-xs text-gray-500">{{ review.student.email }}</p>
+            </div>
+            <div>
+                <h3 class="text-sm font-medium text-gray-500 mb-2">Tutor</h3>
+                <p class="text-sm text-gray-900">{{ review.tutor.get_full_name()|default(review.tutor.username) }}</p>
+                <p class="text-xs text-gray-500">{{ review.tutor.email }}</p>
+            </div>
+            <div>
+                <h3 class="text-sm font-medium text-gray-500 mb-2">Date</h3>
+                <p class="text-sm text-gray-900">{{ review.created_at|date('M d, Y H:i') }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

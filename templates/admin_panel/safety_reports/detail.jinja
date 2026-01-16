@@ -1,0 +1,105 @@
+{% extends "base.jinja" %}
+
+{% block title %}Safety Report Details - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold text-gray-900">Safety Report Details</h1>
+        <a href="{{ url('admin_panel:safety_report_list') }}" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300">
+            ← Back to List
+        </a>
+    </div>
+
+    <div class="bg-white rounded-lg shadow p-6 space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <h3 class="text-sm font-medium text-gray-500 mb-2">Type</h3>
+                <p class="text-sm text-gray-900">{{ report.get_report_type_display() }}</p>
+            </div>
+            <div>
+                <h3 class="text-sm font-medium text-gray-500 mb-2">Status</h3>
+                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                    {% if report.status == 'pending' %}bg-yellow-100 text-yellow-800
+                                {% elif report.status == 'under_investigation' %}bg-blue-100 text-blue-800
+                    {% elif report.status == 'resolved' %}bg-green-100 text-green-800
+                    {% else %}bg-gray-100 text-gray-800{% endif %}">
+                    {{ report.get_status_display() }}
+                </span>
+            </div>
+            <div>
+                <h3 class="text-sm font-medium text-gray-500 mb-2">Reported By</h3>
+                <p class="text-sm text-gray-900">{{ report.reported_by.get_full_name()|default(report.reported_by.username) }}</p>
+                <p class="text-xs text-gray-500">{{ report.reported_by.email }}</p>
+            </div>
+            <div>
+                <h3 class="text-sm font-medium text-gray-500 mb-2">Reported User</h3>
+                <p class="text-sm text-gray-900">{{ report.reported_user.get_full_name()|default(report.reported_user.username) }}</p>
+                <p class="text-xs text-gray-500">{{ report.reported_user.email }}</p>
+            </div>
+            <div>
+                <h3 class="text-sm font-medium text-gray-500 mb-2">Date</h3>
+                <p class="text-sm text-gray-900">{{ report.created_at|date('M d, Y H:i') }}</p>
+            </div>
+        </div>
+
+        <div class="border-t pt-6">
+            <h3 class="text-sm font-medium text-gray-500 mb-2">Description</h3>
+            <p class="text-sm text-gray-900">{{ report.description|linebreaks }}</p>
+        </div>
+
+        {% if report.status == 'pending' or report.status == 'under_investigation' %}
+        <div class="border-t pt-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Handle Report</h3>
+            <form method="post">
+                <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+                <div class="space-y-4">
+                    <div>
+                        <label for="{{ form.status.id_for_label }}" class="block text-sm font-medium text-gray-700">{{ form.status.label }}</label>
+                        {{ form.status }}
+                        {% if form.status.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.status.errors|first }}</p>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label for="{{ form.investigation_notes.id_for_label }}" class="block text-sm font-medium text-gray-700">Investigation Notes</label>
+                        {{ form.investigation_notes }}
+                        {% if form.investigation_notes.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.investigation_notes.errors|first }}</p>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label for="{{ form.action_taken.id_for_label }}" class="block text-sm font-medium text-gray-700">Action Taken</label>
+                        {{ form.action_taken }}
+                        {% if form.action_taken.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.action_taken.errors|first }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="flex justify-end gap-3">
+                        <a href="{{ url('admin_panel:safety_report_list') }}" class="bg-gray-200 text-gray-700 px-6 py-2 rounded-md hover:bg-gray-300">
+                            Cancel
+                        </a>
+                        <button type="submit" class="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700">
+                            Handle Report
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        {% else %}
+        <div class="border-t pt-6">
+            <h3 class="text-sm font-medium text-gray-500 mb-2">Investigation Notes</h3>
+            <p class="text-sm text-gray-900">{{ report.investigation_notes|default('No investigation notes')|linebreaks }}</p>
+            {% if report.action_taken %}
+            <h3 class="text-sm font-medium text-gray-500 mb-2 mt-4">Action Taken</h3>
+            <p class="text-sm text-gray-900">{{ report.action_taken|linebreaks }}</p>
+            {% endif %}
+            {% if report.investigated_by %}
+            <p class="text-xs text-gray-500 mt-2">Investigated by: {{ report.investigated_by.get_full_name()|default(report.investigated_by.username) }}</p>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,97 @@
+{% extends "base.jinja" %}
+
+{% block title %}Document Management - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold text-gray-900">Document Management</h1>
+        <a href="{{ url('admin_panel:global_dashboard') }}" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300">
+            ← Back to Dashboard
+        </a>
+    </div>
+
+    <!-- Filters -->
+    <div class="bg-white rounded-lg shadow p-4 mb-6">
+        <form method="get" class="flex gap-4 items-end">
+            <div class="w-48">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Verification Status</label>
+                <select name="verified" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    <option value="">All Documents</option>
+                    <option value="true" {% if verified_filter == 'true' %}selected{% endif %}>Verified</option>
+                    <option value="false" {% if verified_filter == 'false' %}selected{% endif %}>Pending</option>
+                </select>
+            </div>
+            <div class="w-48">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Document Type</label>
+                <select name="type" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    <option value="">All Types</option>
+                    <option value="academic" {% if doc_type_filter == 'academic' %}selected{% endif %}>Academic</option>
+                    <option value="id_proof" {% if doc_type_filter == 'id_proof' %}selected{% endif %}>ID Proof</option>
+                    <option value="police_verification" {% if doc_type_filter == 'police_verification' %}selected{% endif %}>Police Verification</option>
+                    <option value="certification" {% if doc_type_filter == 'certification' %}selected{% endif %}>Certification</option>
+                </select>
+            </div>
+            <button type="submit" class="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700">Filter</button>
+            {% if verified_filter or doc_type_filter %}
+            <a href="{{ url('admin_panel:document_list') }}" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300">Clear</a>
+            {% endif %}
+        </form>
+    </div>
+
+    <!-- Documents Table -->
+    <div class="bg-white rounded-lg shadow overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <p class="text-sm text-gray-600">Total: <span class="font-semibold">{{ total_count }}</span> documents</p>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tutor</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Document Type</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Verified By</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for document in documents %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {% if document.tutor and document.tutor.user %}
+                                {{ document.tutor.user.get_full_name()|default(document.tutor.user.username) }}
+                            {% else %}
+                                <span class="text-gray-400 italic">Tutor removed</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ document.get_document_type_display() }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                {% if document.is_verified %}bg-green-100 text-green-800{% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                                {% if document.is_verified %}Verified{% else %}Pending{% endif %}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {% if document.verified_by %}
+                                {{ document.verified_by.get_full_name()|default(document.verified_by.username) }}
+                            {% else %}
+                                Not verified
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ document.created_at|date('M d, Y') }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <a href="{{ url('admin_panel:verify_document', document_id=document.id) }}" class="text-indigo-600 hover:text-indigo-900">View/Verify</a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">No documents found</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

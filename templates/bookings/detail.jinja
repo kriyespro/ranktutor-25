@@ -1,0 +1,104 @@
+{% extends "base.jinja" %}
+
+{% block title %}Booking Details - RankTutor{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <h1 class="text-3xl font-bold text-gray-900 mb-6">Booking Details</h1>
+    
+    <div class="bg-white rounded-lg shadow p-6">
+        <div class="space-y-4">
+            <div>
+                <p class="text-sm text-gray-500">Status</p>
+                <p class="text-lg font-semibold">{{ booking.get_status_display() }}</p>
+            </div>
+            <div>
+                <p class="text-sm text-gray-500">Tutor</p>
+                <p class="text-lg font-semibold">{{ booking.tutor.get_full_name()|default(booking.tutor.username) }}</p>
+            </div>
+            <div>
+                <p class="text-sm text-gray-500">Subject</p>
+                <p class="text-lg font-semibold">{{ booking.subject.name }}</p>
+            </div>
+            <div>
+                <p class="text-sm text-gray-500">Date & Time</p>
+                <p class="text-lg font-semibold">{{ booking.lesson_date }} at {{ booking.lesson_time }}</p>
+            </div>
+            <div>
+                <p class="text-sm text-gray-500">Duration</p>
+                <p class="text-lg font-semibold">{{ booking.duration_hours }} hours</p>
+            </div>
+            <div>
+                <p class="text-sm text-gray-500">Total Amount</p>
+                <p class="text-lg font-semibold">₹{{ booking.total_amount }}</p>
+            </div>
+            {% if booking.student_notes %}
+            <div>
+                <p class="text-sm text-gray-500">Notes</p>
+                <p class="text-lg">{{ booking.student_notes }}</p>
+            </div>
+            {% endif %}
+            {% if booking.is_recurring %}
+            <div>
+                <p class="text-sm text-gray-500">Recurring Pattern</p>
+                <p class="text-lg font-semibold">{{ booking.get_recurrence_pattern_display() }}</p>
+                {% if booking.recurrence_end_date %}
+                <p class="text-sm text-gray-500">Until {{ booking.recurrence_end_date }}</p>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+        
+        {% if recurring_bookings %}
+        <div class="mt-6 bg-gray-50 rounded-lg p-4">
+            <h3 class="font-semibold mb-3">Upcoming Recurring Lessons</h3>
+            <div class="space-y-2">
+                {% for recurring in recurring_bookings %}
+                <div class="flex justify-between items-center">
+                    <span>{{ recurring.lesson_date }} at {{ recurring.lesson_time }}</span>
+                    <span class="px-2 py-1 rounded text-xs {% if recurring.status == 'accepted' %}bg-green-100 text-green-800{% elif recurring.status == 'completed' %}bg-blue-100 text-blue-800{% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                        {{ recurring.get_status_display() }}
+                    </span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        
+        {% if booking.tutor == user and booking.status == 'pending' %}
+        <div class="mt-6 flex gap-4">
+            <a href="{{ url('bookings:accept', booking.id) }}" class="flex-1 bg-green-600 text-white px-6 py-3 rounded-md hover:bg-green-700 text-center">
+                Accept
+            </a>
+            <a href="{{ url('bookings:reject', booking.id) }}" class="flex-1 bg-red-600 text-white px-6 py-3 rounded-md hover:bg-red-700 text-center">
+                Reject
+            </a>
+        </div>
+        {% endif %}
+        
+        <div class="mt-6 flex gap-4">
+            {% if booking.status == 'accepted' and lesson %}
+            <a href="{{ url('bookings:lesson_notes', booking.id) }}" class="inline-block bg-indigo-600 text-white px-6 py-3 rounded-md hover:bg-indigo-700">
+                View Lesson Notes
+            </a>
+            {% elif booking.status == 'accepted' and not lesson %}
+            <a href="{{ url('bookings:complete', booking.id) }}" class="inline-block bg-indigo-600 text-white px-6 py-3 rounded-md hover:bg-indigo-700">
+                Complete Lesson
+            </a>
+            {% endif %}
+            <a href="{{ url('messaging:start_from_booking', booking.id) }}" class="inline-block bg-green-600 text-white px-6 py-3 rounded-md hover:bg-green-700">
+                Message {% if booking.student == user %}{{ booking.tutor.get_full_name()|default(booking.tutor.username) }}{% else %}{{ booking.student.get_full_name()|default(booking.student.username) }}{% endif %}
+            </a>
+            {% if booking.status == 'completed' and booking.student == user %}
+            <a href="{{ url('reviews:create', booking.id) }}" class="inline-block bg-yellow-600 text-white px-6 py-3 rounded-md hover:bg-yellow-700">
+                Write Review
+            </a>
+            {% endif %}
+            <a href="{{ url('reviews:raise_dispute', booking.id) }}" class="inline-block bg-red-600 text-white px-6 py-3 rounded-md hover:bg-red-700">
+                Raise Dispute
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

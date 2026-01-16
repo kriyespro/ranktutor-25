@@ -1,0 +1,81 @@
+{% extends "base.jinja" %}
+
+{% block title %}Become a Tutor - RankTutor{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="text-center mb-12">
+        <h1 class="text-4xl font-bold text-gray-900 mb-4">Become a Tutor on RankTutor</h1>
+        <p class="text-xl text-gray-600">Share your knowledge and earn money by teaching students</p>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
+        <h2 class="text-2xl font-semibold mb-6">Why Join RankTutor?</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <h3 class="text-lg font-semibold text-indigo-600 mb-2">Flexible Schedule</h3>
+                <p class="text-gray-600">Set your own availability and teach when it suits you.</p>
+            </div>
+            <div>
+                <h3 class="text-lg font-semibold text-indigo-600 mb-2">Fair Earnings</h3>
+                <p class="text-gray-600">Set your own rates and get paid directly by students.</p>
+            </div>
+            <div>
+                <h3 class="text-lg font-semibold text-indigo-600 mb-2">Build Your Reputation</h3>
+                <p class="text-gray-600">Earn reviews and ratings to attract more students.</p>
+            </div>
+            <div>
+                <h3 class="text-lg font-semibold text-indigo-600 mb-2">Support & Resources</h3>
+                <p class="text-gray-600">Access teaching resources and support from our team.</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="bg-indigo-50 rounded-lg p-8 mb-8">
+        <h2 class="text-2xl font-semibold mb-4">How It Works</h2>
+        <ol class="space-y-4">
+            <li class="flex items-start">
+                <span class="flex-shrink-0 w-8 h-8 bg-indigo-600 text-white rounded-full flex items-center justify-center font-semibold mr-4">1</span>
+                <div>
+                    <h3 class="font-semibold mb-1">Create Your Profile</h3>
+                    <p class="text-gray-600">Sign up and complete your tutor profile with your qualifications and subjects.</p>
+                </div>
+            </li>
+            <li class="flex items-start">
+                <span class="flex-shrink-0 w-8 h-8 bg-indigo-600 text-white rounded-full flex items-center justify-center font-semibold mr-4">2</span>
+                <div>
+                    <h3 class="font-semibold mb-1">Get Verified</h3>
+                    <p class="text-gray-600">Upload your documents for verification. Our team will review and approve your profile.</p>
+                </div>
+            </li>
+            <li class="flex items-start">
+                <span class="flex-shrink-0 w-8 h-8 bg-indigo-600 text-white rounded-full flex items-center justify-center font-semibold mr-4">3</span>
+                <div>
+                    <h3 class="font-semibold mb-1">Start Teaching</h3>
+                    <p class="text-gray-600">Students will find you through our search. Accept bookings and start teaching!</p>
+                </div>
+            </li>
+        </ol>
+    </div>
+    
+    <div class="text-center">
+        {% if user.is_authenticated %}
+            {% if user.is_tutor %}
+                <a href="{{ url('tutors:dashboard') }}" class="inline-block bg-indigo-600 text-white px-8 py-3 rounded-md hover:bg-indigo-700 text-lg font-semibold">
+                    Go to Dashboard
+                </a>
+            {% else %}
+                <p class="text-gray-600 mb-4">To become a tutor, you need to register with a tutor account.</p>
+                <a href="{{ url('users:register') }}" class="inline-block bg-indigo-600 text-white px-8 py-3 rounded-md hover:bg-indigo-700 text-lg font-semibold">
+                    Register as Tutor
+                </a>
+            {% endif %}
+        {% else %}
+            <a href="{{ url('users:register') }}" class="inline-block bg-indigo-600 text-white px-8 py-3 rounded-md hover:bg-indigo-700 text-lg font-semibold">
+                Get Started
+            </a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+

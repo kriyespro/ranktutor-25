@@ -1,0 +1,52 @@
+{% extends "base.jinja" %}
+
+{% block title %}FAQ - RankTutor{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <h1 class="text-3xl font-bold text-gray-900 mb-6">Frequently Asked Questions</h1>
+    
+    <div class="mb-6">
+        <div class="flex gap-2 flex-wrap">
+            <a href="?category=general" class="px-4 py-2 rounded-md {% if current_category == 'general' %}bg-indigo-600 text-white{% else %}bg-gray-200 text-gray-700{% endif %}">
+                General
+            </a>
+            <a href="?category=students" class="px-4 py-2 rounded-md {% if current_category == 'students' %}bg-indigo-600 text-white{% else %}bg-gray-200 text-gray-700{% endif %}">
+                For Students
+            </a>
+            <a href="?category=tutors" class="px-4 py-2 rounded-md {% if current_category == 'tutors' %}bg-indigo-600 text-white{% else %}bg-gray-200 text-gray-700{% endif %}">
+                For Tutors
+            </a>
+            <a href="?category=payments" class="px-4 py-2 rounded-md {% if current_category == 'payments' %}bg-indigo-600 text-white{% else %}bg-gray-200 text-gray-700{% endif %}">
+                Payments
+            </a>
+            <a href="?category=bookings" class="px-4 py-2 rounded-md {% if current_category == 'bookings' %}bg-indigo-600 text-white{% else %}bg-gray-200 text-gray-700{% endif %}">
+                Bookings
+            </a>
+        </div>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow">
+        <div class="divide-y divide-gray-200">
+            {% for faq in faqs %}
+            <div class="p-6" x-data="{ open: false }">
+                <button @click="open = !open" class="w-full text-left flex justify-between items-center">
+                    <h3 class="text-lg font-semibold text-gray-900">{{ faq.question }}</h3>
+                    <svg class="h-5 w-5 text-gray-500" :class="{ 'transform rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
+                <div x-show="open" x-transition class="mt-4 text-gray-700">
+                    {{ faq.answer|linebreaks }}
+                </div>
+            </div>
+            {% else %}
+            <div class="p-6 text-center text-gray-500">
+                <p>No FAQs found in this category.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+

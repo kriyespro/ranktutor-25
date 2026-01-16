@@ -1,0 +1,19 @@
+{% extends "base.jinja" %}
+
+{% block title %}{{ page.title }} - RankTutor{% endblock %}
+
+{% block meta %}
+<meta name="description" content="{{ page.meta_description }}">
+{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <article class="bg-white rounded-lg shadow p-8">
+        <h1 class="text-4xl font-bold mb-6">{{ page.title }}</h1>
+        <div class="prose max-w-none">
+            {{ page.content|linebreaks }}
+        </div>
+    </article>
+</div>
+{% endblock %}
+

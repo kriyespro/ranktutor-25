@@ -1,0 +1,55 @@
+{% extends "base.jinja" %}
+
+{% block title %}Verify Document - RankTutor{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <h1 class="text-3xl font-bold text-gray-900 mb-6">Verify Document</h1>
+    
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <div class="mb-4">
+            <p class="text-sm text-gray-500">Tutor</p>
+            <p class="text-lg font-semibold">{{ document.tutor.user.get_full_name()|default(document.tutor.user.username) }}</p>
+        </div>
+        <div class="mb-4">
+            <p class="text-sm text-gray-500">Document Type</p>
+            <p class="text-lg font-semibold">{{ document.get_document_type_display() }}</p>
+        </div>
+        <div class="mb-4">
+            <p class="text-sm text-gray-500">Uploaded On</p>
+            <p class="text-lg">{{ document.created_at|date('F d, Y') }}</p>
+        </div>
+        <div class="mb-4">
+            <p class="text-sm text-gray-500">Status</p>
+            <span class="px-3 py-1 rounded-full text-sm font-semibold {% if document.is_verified %}bg-green-100 text-green-800{% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                {% if document.is_verified %}Verified{% else %}Pending{% endif %}
+            </span>
+        </div>
+        <div class="mb-4">
+            <a href="{{ document.document_file.url }}" target="_blank" class="text-indigo-600 hover:text-indigo-800">
+                View Document →
+            </a>
+        </div>
+    </div>
+    
+    <form method="post" class="bg-white rounded-lg shadow p-6">
+        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+        <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Notes</label>
+            <textarea name="notes" rows="4" class="w-full rounded-md border-gray-300" placeholder="Add any notes about this verification...">{{ document.notes }}</textarea>
+        </div>
+        <div class="flex gap-4">
+            <button type="submit" name="action" value="approve" class="flex-1 bg-green-600 text-white px-6 py-3 rounded-md hover:bg-green-700">
+                Approve & Verify
+            </button>
+            <button type="submit" name="action" value="reject" class="flex-1 bg-red-600 text-white px-6 py-3 rounded-md hover:bg-red-700">
+                Reject
+            </button>
+            <a href="{{ url('admin_panel:city_dashboard') }}" class="flex-1 bg-gray-300 text-gray-700 px-6 py-3 rounded-md hover:bg-gray-400 text-center">
+                Cancel
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}
+

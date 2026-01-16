@@ -1,0 +1,59 @@
+{% extends "base.jinja" %}
+
+{% block title %}Payment Details - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold text-gray-900">Payment Details</h1>
+        <a href="{{ url('admin_panel:payment_list') }}" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300">
+            ← Back to List
+        </a>
+    </div>
+
+    <div class="bg-white rounded-lg shadow p-6 space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <h3 class="text-sm font-medium text-gray-500 mb-2">Transaction ID</h3>
+                <p class="text-sm text-gray-900">{{ payment.transaction_id|default('N/A') }}</p>
+            </div>
+            <div>
+                <h3 class="text-sm font-medium text-gray-500 mb-2">Status</h3>
+                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                    {% if payment.status == 'completed' %}bg-green-100 text-green-800
+                    {% elif payment.status == 'failed' %}bg-red-100 text-red-800
+                    {% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                    {{ payment.get_status_display() }}
+                </span>
+            </div>
+            <div>
+                <h3 class="text-sm font-medium text-gray-500 mb-2">Amount</h3>
+                <p class="text-lg font-bold text-gray-900">₹{{ payment.amount|floatformat(2) }}</p>
+            </div>
+            <div>
+                <h3 class="text-sm font-medium text-gray-500 mb-2">Commission</h3>
+                <p class="text-sm text-gray-900">₹{{ payment.commission_amount|floatformat(2) }}</p>
+            </div>
+            <div>
+                <h3 class="text-sm font-medium text-gray-500 mb-2">Student</h3>
+                <p class="text-sm text-gray-900">{{ payment.student.get_full_name()|default(payment.student.username) }}</p>
+                <p class="text-xs text-gray-500">{{ payment.student.email }}</p>
+            </div>
+            <div>
+                <h3 class="text-sm font-medium text-gray-500 mb-2">Tutor</h3>
+                <p class="text-sm text-gray-900">{{ payment.tutor.get_full_name()|default(payment.tutor.username) }}</p>
+                <p class="text-xs text-gray-500">{{ payment.tutor.email }}</p>
+            </div>
+            <div>
+                <h3 class="text-sm font-medium text-gray-500 mb-2">Payment Method</h3>
+                <p class="text-sm text-gray-900">{{ payment.get_payment_method_display() }}</p>
+            </div>
+            <div>
+                <h3 class="text-sm font-medium text-gray-500 mb-2">Date</h3>
+                <p class="text-sm text-gray-900">{{ payment.created_at|date('M d, Y H:i') }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

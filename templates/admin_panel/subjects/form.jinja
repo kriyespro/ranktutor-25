@@ -1,0 +1,59 @@
+{% extends "base.jinja" %}
+
+{% block title %}{{ action }} Subject - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold text-gray-900">{{ action }} Subject</h1>
+        <a href="{{ url('admin_panel:subject_list') }}" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300">
+            ← Back to List
+        </a>
+    </div>
+
+    <div class="bg-white rounded-lg shadow p-6">
+        <form method="post">
+            <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+            
+            <div class="space-y-6">
+                <div>
+                    <label for="{{ form.name.id_for_label }}" class="block text-sm font-medium text-gray-700">{{ form.name.label }}</label>
+                    {{ form.name }}
+                    {% if form.name.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ form.name.errors|first }}</p>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label for="{{ form.description.id_for_label }}" class="block text-sm font-medium text-gray-700">{{ form.description.label }}</label>
+                    {{ form.description }}
+                    {% if form.description.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ form.description.errors|first }}</p>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label for="{{ form.icon.id_for_label }}" class="block text-sm font-medium text-gray-700">{{ form.icon.label }}</label>
+                    {{ form.icon }}
+                    {% if form.icon.help_text %}
+                    <p class="mt-1 text-sm text-gray-500">{{ form.icon.help_text }}</p>
+                    {% endif %}
+                    {% if form.icon.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ form.icon.errors|first }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="mt-6 flex justify-end gap-3">
+                <a href="{{ url('admin_panel:subject_list') }}" class="bg-gray-200 text-gray-700 px-6 py-2 rounded-md hover:bg-gray-300">
+                    Cancel
+                </a>
+                <button type="submit" class="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700">
+                    {{ action }} Subject
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+

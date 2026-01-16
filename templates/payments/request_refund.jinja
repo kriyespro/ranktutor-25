@@ -1,0 +1,42 @@
+{% extends "base.jinja" %}
+
+{% block title %}Request Refund - RankTutor{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <h1 class="text-3xl font-bold text-gray-900 mb-6">Request Refund</h1>
+    
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <div class="mb-4">
+            <p class="text-sm text-gray-500">Payment Amount</p>
+            <p class="text-2xl font-bold text-indigo-600">₹{{ payment.amount }}</p>
+        </div>
+        <div class="mb-4">
+            <p class="text-sm text-gray-500">Payment Date</p>
+            <p class="text-lg font-semibold">{{ payment.created_at|date('F d, Y') }}</p>
+        </div>
+        <div class="mb-4">
+            <p class="text-sm text-gray-500">Tutor</p>
+            <p class="text-lg font-semibold">{{ payment.tutor.get_full_name()|default(payment.tutor.username) }}</p>
+        </div>
+    </div>
+    
+    <form method="post" class="bg-white rounded-lg shadow p-6">
+        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Reason for Refund</label>
+            <textarea name="reason" rows="5" class="w-full rounded-md border-gray-300" required placeholder="Please explain why you need a refund..."></textarea>
+            <p class="text-sm text-gray-500 mt-2">We will review your request and process the refund if approved.</p>
+        </div>
+        <div class="mt-6 flex gap-4">
+            <button type="submit" class="bg-red-600 text-white px-6 py-3 rounded-md hover:bg-red-700">
+                Submit Refund Request
+            </button>
+            <a href="{{ url('payments:detail', payment.id) }}" class="bg-gray-300 text-gray-700 px-6 py-3 rounded-md hover:bg-gray-400">
+                Cancel
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}
+

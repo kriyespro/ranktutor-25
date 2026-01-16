@@ -1,0 +1,54 @@
+{% extends "base.jinja" %}
+
+{% block title %}Tutor Resources - RankTutor{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+    <div class="mb-6">
+        <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">Tutor Resources</h1>
+        {% include "components/tutor_menu.jinja" %}
+    </div>
+    
+    <div class="space-y-6 sm:space-y-8">
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-2xl font-semibold mb-4">Getting Started</h2>
+            <ul class="space-y-2 text-gray-600">
+                <li>• Complete your profile with accurate information</li>
+                <li>• Upload verification documents for faster approval</li>
+                <li>• Set your availability and pricing</li>
+                <li>• Add subjects and teaching levels you're comfortable with</li>
+            </ul>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-2xl font-semibold mb-4">Best Practices</h2>
+            <ul class="space-y-2 text-gray-600">
+                <li>• Respond to booking requests promptly</li>
+                <li>• Be professional and punctual in your lessons</li>
+                <li>• Communicate clearly with students and parents</li>
+                <li>• Keep your profile and availability updated</li>
+                <li>• Encourage students to leave reviews after lessons</li>
+            </ul>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-2xl font-semibold mb-4">Earning Tips</h2>
+            <ul class="space-y-2 text-gray-600">
+                <li>• Set competitive but fair pricing based on your experience</li>
+                <li>• Offer trial classes to attract new students</li>
+                <li>• Consider premium features to boost your visibility</li>
+                <li>• Build a strong reputation through quality teaching</li>
+            </ul>
+        </div>
+        
+        <div class="bg-indigo-50 rounded-lg p-6">
+            <h2 class="text-2xl font-semibold mb-4">Need Help?</h2>
+            <p class="text-gray-600 mb-4">If you have any questions or need assistance, please contact our support team.</p>
+            <a href="{{ url('cms:page', 'contact') }}" class="text-indigo-600 hover:text-indigo-800 font-semibold">
+                Contact Support →
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,68 @@
+{% extends "base.jinja" %}
+
+{% block title %}Blog - RankTutor{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <h1 class="text-3xl font-bold text-gray-900 mb-6">Blog</h1>
+    
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div class="lg:col-span-3">
+            {% if posts %}
+                <div class="space-y-6">
+                    {% for post in posts %}
+                    <article class="bg-white rounded-lg shadow p-6">
+                        <h2 class="text-2xl font-bold mb-2">
+                            <a href="{{ url('cms:blog_detail', post.slug) }}" class="text-indigo-600 hover:text-indigo-800">
+                                {{ post.title }}
+                            </a>
+                        </h2>
+                        <p class="text-sm text-gray-500 mb-4">
+                            By {{ post.author.get_full_name()|default(post.author.username)|default('Admin') }} 
+                            on {{ post.published_at|date('F d, Y') }}
+                        </p>
+                        {% if post.excerpt %}
+                        <p class="text-gray-700 mb-4">{{ post.excerpt }}</p>
+                        {% endif %}
+                        <a href="{{ url('cms:blog_detail', post.slug) }}" class="text-indigo-600 hover:text-indigo-800">
+                            Read more →
+                        </a>
+                    </article>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-gray-500">No blog posts found.</p>
+            {% endif %}
+        </div>
+        
+        <div class="lg:col-span-1">
+            <div class="bg-white rounded-lg shadow p-6 mb-6">
+                <h3 class="font-semibold mb-4">Categories</h3>
+                <ul class="space-y-2">
+                    {% for category in categories %}
+                    <li>
+                        <a href="?category={{ category.slug }}" class="text-indigo-600 hover:text-indigo-800">
+                            {{ category.name }}
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="font-semibold mb-4">Recent Posts</h3>
+                <ul class="space-y-2">
+                    {% for post in recent_posts %}
+                    <li>
+                        <a href="{{ url('cms:blog_detail', post.slug) }}" class="text-sm text-indigo-600 hover:text-indigo-800">
+                            {{ post.title }}
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

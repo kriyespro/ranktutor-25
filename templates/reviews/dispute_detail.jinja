@@ -1,0 +1,132 @@
+{% extends "base.jinja" %}
+
+{% block title %}Dispute #{{ dispute.id }} - RankTutor{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold text-gray-900">Dispute #{{ dispute.id }}</h1>
+        <a href="{% if user.is_tutor() %}{{ url('tutors:dashboard') }}{% else %}{{ url('students:dashboard') }}{% endif %}" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300">
+            ← Back to Dashboard
+        </a>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <div class="flex items-center gap-3 mb-4">
+            <h2 class="text-xl font-semibold">Dispute Information</h2>
+            <span class="px-3 py-1 text-sm font-semibold rounded-full
+                {% if dispute.status == 'open' %}bg-red-100 text-red-800
+                {% elif dispute.status == 'under_review' %}bg-yellow-100 text-yellow-800
+                {% elif dispute.status == 'resolved' %}bg-green-100 text-green-800
+                {% else %}bg-gray-100 text-gray-800{% endif %}">
+                {{ dispute.get_status_display() }}
+            </span>
+        </div>
+        
+        <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+                <dt class="text-sm font-medium text-gray-500">Dispute Type</dt>
+                <dd class="mt-1 text-sm text-gray-900">{{ dispute.get_dispute_type_display() }}</dd>
+            </div>
+            <div>
+                <dt class="text-sm font-medium text-gray-500">Status</dt>
+                <dd class="mt-1 text-sm text-gray-900">{{ dispute.get_status_display() }}</dd>
+            </div>
+            <div>
+                <dt class="text-sm font-medium text-gray-500">Raised By</dt>
+                <dd class="mt-1 text-sm text-gray-900">{{ dispute.raised_by.get_full_name()|default(dispute.raised_by.username) }}</dd>
+            </div>
+            <div>
+                <dt class="text-sm font-medium text-gray-500">Raised On</dt>
+                <dd class="mt-1 text-sm text-gray-900">{{ dispute.created_at|date('F d, Y h:i A') }}</dd>
+            </div>
+        </dl>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h2 class="text-xl font-semibold mb-4">Booking Details</h2>
+        <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+                <dt class="text-sm font-medium text-gray-500">Subject</dt>
+                <dd class="mt-1 text-sm text-gray-900">{{ booking.subject.name }}</dd>
+            </div>
+            <div>
+                <dt class="text-sm font-medium text-gray-500">Date & Time</dt>
+                <dd class="mt-1 text-sm text-gray-900">{{ booking.lesson_date|date('F d, Y') }} at {{ booking.lesson_time|date('h:i A') }}</dd>
+            </div>
+            {% if user.is_tutor() %}
+            <div>
+                <dt class="text-sm font-medium text-gray-500">Student</dt>
+                <dd class="mt-1 text-sm text-gray-900">{{ booking.student.get_full_name()|default(booking.student.username) }}</dd>
+            </div>
+            {% else %}
+            <div>
+                <dt class="text-sm font-medium text-gray-500">Tutor</dt>
+                <dd class="mt-1 text-sm text-gray-900">{{ booking.tutor.get_full_name()|default(booking.tutor.username) }}</dd>
+            </div>
+            {% endif %}
+            <div>
+                <dt class="text-sm font-medium text-gray-500">Booking Status</dt>
+                <dd class="mt-1">
+                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">
+                        {{ booking.get_status_display() }}
+                    </span>
+                </dd>
+            </div>
+        </dl>
+        <div class="mt-4">
+            <a href="{{ url('bookings:detail', booking_id=booking.id) }}" class="text-indigo-600 hover:text-indigo-800 text-sm">
+                View Full Booking Details →
+            </a>
+        </div>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h2 class="text-xl font-semibold mb-4">Dispute Description</h2>
+        <div class="prose max-w-none">
+            <p class="text-gray-700 whitespace-pre-wrap">{{ dispute.description }}</p>
+        </div>
+    </div>
+    
+    {% if dispute.resolution %}
+    <div class="bg-green-50 border-l-4 border-green-400 rounded-lg shadow p-6 mb-6">
+        <h2 class="text-xl font-semibold text-green-900 mb-4">Resolution</h2>
+        <div class="prose max-w-none">
+            <p class="text-gray-700 whitespace-pre-wrap">{{ dispute.resolution }}</p>
+        </div>
+        {% if dispute.resolved_by %}
+        <div class="mt-4 pt-4 border-t border-green-200">
+            <p class="text-sm text-gray-600">
+                <strong>Resolved by:</strong> {{ dispute.resolved_by.get_full_name()|default(dispute.resolved_by.username) }}
+                {% if dispute.resolved_at %}
+                on {{ dispute.resolved_at|date('F d, Y h:i A') }}
+                {% endif %}
+            </p>
+        </div>
+        {% endif %}
+    </div>
+    {% else %}
+    <div class="bg-yellow-50 border-l-4 border-yellow-400 rounded-lg shadow p-6 mb-6">
+        <p class="text-yellow-800">
+            <strong>Status:</strong> This dispute is {{ dispute.get_status_display()|lower }}. Our team is reviewing it and will provide a resolution soon.
+        </p>
+    </div>
+    {% endif %}
+    
+    <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-xl font-semibold mb-4">Need Help?</h2>
+        <p class="text-gray-600 mb-4">
+            If you have additional information or questions about this dispute, please contact our support team.
+        </p>
+        <div class="flex gap-4">
+            <a href="{% if user.is_tutor() %}{{ url('tutors:dashboard') }}{% else %}{{ url('students:dashboard') }}{% endif %}" class="bg-gray-200 text-gray-700 px-6 py-2 rounded-md hover:bg-gray-300">
+                Back to Dashboard
+            </a>
+            <a href="{{ url('bookings:detail', booking_id=booking.id) }}" class="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700">
+                View Booking
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

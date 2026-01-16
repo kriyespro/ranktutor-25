@@ -1,0 +1,65 @@
+{% extends "base.jinja" %}
+
+{% block title %}Upload Documents - RankTutor{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+    <div class="mb-6">
+        <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">Upload Verification Documents</h1>
+        {% include "components/tutor_menu.jinja" %}
+    </div>
+    
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h2 class="text-xl font-semibold mb-4">Upload New Document</h2>
+        <form method="post" enctype="multipart/form-data">
+            <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Document Type</label>
+                    {{ form.document_type }}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Document File</label>
+                    {{ form.document_file }}
+                    <p class="text-sm text-gray-500 mt-1">Upload PDF, JPG, or PNG files (max 5MB)</p>
+                </div>
+            </div>
+            <div class="mt-4">
+                <button type="submit" class="bg-indigo-600 text-white px-6 py-3 rounded-md hover:bg-indigo-700">
+                    Upload Document
+                </button>
+            </div>
+        </form>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-xl font-semibold mb-4">Uploaded Documents</h2>
+        {% if documents %}
+            <div class="space-y-4">
+                {% for document in documents %}
+                <div class="border rounded-lg p-4">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="font-medium">{{ document.get_document_type_display() }}</p>
+                            <p class="text-sm text-gray-500">Uploaded on {{ document.created_at|date('M d, Y') }}</p>
+                            <p class="text-sm mt-2">
+                                Status: 
+                                <span class="{% if document.is_verified %}text-green-600{% else %}text-yellow-600{% endif %}">
+                                    {% if document.is_verified %}Verified{% else %}Pending Verification{% endif %}
+                                </span>
+                            </p>
+                        </div>
+                        <a href="{{ document.document_file.url }}" target="_blank" class="text-indigo-600 hover:text-indigo-800">
+                            View
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-gray-500">No documents uploaded yet.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
